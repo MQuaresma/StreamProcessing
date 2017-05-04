@@ -1,0 +1,9 @@
+*.out
+
+## macOS
+.DS_Store
+
+._*
+*.txt
+*.pdf
+**/*.swp
