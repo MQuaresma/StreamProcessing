@@ -1,6 +1,6 @@
 # TODO
 # Components
-- [ ] const <value>
+- [x] const <value>
 - [ ] filter <column> <operator> <operand> 
-- [ ] window <column> <operation> <lines>
+- [x] window <column> <operation> <lines>
 - [ ] spawn <cmd> <args...>
