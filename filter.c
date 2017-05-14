@@ -17,6 +17,7 @@ int main(int argc, char* argv[]) {
 				line[a]=c;
 				a++;
 			}
+			
 			else {
 				line[a]='\n';
 				a++;
