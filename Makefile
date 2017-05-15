@@ -4,7 +4,7 @@ CC=gcc
 DEP=controler.o jobTracker.o supervisor.o
 OBJ= window filter spawn const 
 
-controler: $(OBJ) $(DEP) 
+controler: $(OBJ) $(DEP)
 	$(CC) -o controler $(DEP)
 
 controler.o: controler.c
