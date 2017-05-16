@@ -3,6 +3,7 @@
 #include<string.h>
 #include<stdlib.h>
 #include<fcntl.h>
+#include<signal.h>
 #include<unistd.h>
 #include<sys/syslimits.h>
 
@@ -15,11 +16,11 @@ main(){
     
     char command[PIPE_BUF], **args = NULL;
     int i, controlerTracker[2];
-    pid_t jobTracker;
+    pid_t jobTrackerP;
 
     // Establish a way of communication between job tracker and controler
     if(pipe(controlerTracker) != -1){
-        if(!(jobTracker=fork())){
+        if(!(jobTrackerP=fork())){
             dup2(controlerTracker[0], 0); //stdin becomes output of pipe
             close(controlerTracker[0]);
             close(controlerTracker[1]); //close input end to avoid conflicts
@@ -33,9 +34,9 @@ main(){
                 command[i] = 0;
                 args = processCommand(command);
                 for(i = 0; args[i]; printf("%s\n", args[i]), i ++);
-                //for(i = 0; args[i]; i ++) write(controlerTracker[1], args[i], strlen(args[i]));
-                //signal finish of command?
-                //pipe command to the job handler
+                for(i = 0; args[i]; i ++) write(controlerTracker[1], args[i], strlen(args[i]));
+                write(controlerTracker[1], ";", 1);  //signal finish of command
+                kill(jobTrackerP, SIGUSR1);
                 free(args);
             }
         }
