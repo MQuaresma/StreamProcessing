@@ -4,34 +4,30 @@
 #define INITS 20
 
 
+void newNode(int, pid_t*);
+int connect(int, pid_t*);
+
+
 void jobTracker(){
 
     int argc;
-    pid_t *nodes = (pid_t*)calloc(INITS, sizeof(pid_t));
-    char buf[PIPE_BUF], noArgs[10], **argv;
     ssize_t r;
+    char cmd[INITS];
+    pid_t *nodes = (pid_t*)calloc(INITS, sizeof(pid_t));
 
     signal(SIGUSR1, recieveMesssage);
 
     while(1){
         pause();
-        r = read(0, noArgs, 10);
-        noArgs[r] = 0;
-        argc = atoi(noArgs);
-        argv = (char**)calloc(argc, sizeof(void*));
-        for(int i = 0; i < argc && (r = read(1, argv[i])); i ++){
-            if(!strncmp(buf, "node", r)){
-                while((r = read(0, buf, PIPE_BUF)) > 0 && buf[0] != ';')
-                    sscanf("%d", )
-                    nodes[fpr]
-
-            }
-
-
+        r = read(0, cmd, INITS);
+        cmd[r] = 0;
+        argc = atoi(cmd);
+        r = read(0, cmd, INITS); //read command to be executed
+        if(r > 0){
+            if(!strncmp(cmd, "node", r)) newNode(argc, nodes);
+            else if(!strncmp(cmd, "connect", r))
+                if(connect(argc, nodes)) fprintf(stderr, "Couldn't connect request nodes\n");
         }
-         
-
-        free(argv);
     }
 
     free(nodes);
