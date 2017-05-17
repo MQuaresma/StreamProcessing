@@ -3,8 +3,7 @@
 #include <signals.h>
 #define INITS 20
 
-
-void newNode(int, pid_t*);
+int newNode(char **, pid_t **, int);
 int connect(int, pid_t*);
 
 
@@ -24,7 +23,7 @@ void jobTracker(){
         argc = atoi(cmd);
         r = read(0, cmd, INITS); //read command to be executed
         if(r > 0){
-            if(!strncmp(cmd, "node", r)) newNode(argc, nodes);
+            if(!strncmp(cmd, "node", r)) newNode(cmd, nodes);
             else if(!strncmp(cmd, "connect", r))
                 if(connect(argc, nodes)) fprintf(stderr, "Couldn't connect request nodes\n");
         }
@@ -38,4 +37,31 @@ void recieveMesssage(int sig){
 
    if(sig == SIGUSR2) kill(getpid(), SIGINT);
 
+}
+
+int newNode(char *args[], pid_t **nodes, int **pipes, int nds){
+	int i, p, space=0, pf[2];
+	
+	pipe(pf);
+	close(pf[0]);
+
+	if((p=fork())==0){
+			close(pf[1]);
+			dup2(pf[0],0);
+			close(pf[0]);
+			execvp("./supervisor",args+1);
+			perror("Supervisor Error");
+			_exit(1);
+	}
+		
+	for(i=0; i<nds && !space; i++)
+		if((*nodes)[i]==0) space=1;	
+	if(!space){
+		nds = nds + nds/2;
+		*nodes = realloc(*nodes,nds);
+		*pipes = realloc(*pipes,nds);
+	}
+	(*nodes)[i]= p;
+	(*pipes)[i]= pf[1];
+	return nds;			
 }
