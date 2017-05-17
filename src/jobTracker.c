@@ -95,7 +95,10 @@ void connect(char **cmd, pid_t *nodes, int *pd){
     if(*cmd){
         src = atoi(*cmd); //id of the source node
         len = strlen(src);
+        pipeName[len] = 0;
         strcat(pipeName, src);
+        strcat(pipeName, "-");
+        len ++;
         while(*++cmd){
             pipeName[len] = 0;
             dest = atoi(*cmd); //get index of destination of output
