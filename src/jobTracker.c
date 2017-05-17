@@ -40,28 +40,34 @@ void recieveMesssage(int sig){
 }
 
 int newNode(char *args[], pid_t **nodes, int **pipes, int nds){
-	int i, p, space=0, pf[2];
+	int id, i, p, space=0, pf[2];
 	
+	id = atoi(args[0]);
 	pipe(pf);
-	close(pf[0]);
+	
+	for(i=0;args[i]; i++);
+	i++;
+	char **ar == (char**)calloc(i,sizeof(char));
+	
+	ar[0]="supervisor";
+	for(i=1; args[i]; i++) ar[i]=strdup(args[i]);
 
 	if((p=fork())==0){
 			close(pf[1]);
 			dup2(pf[0],0);
 			close(pf[0]);
-			execvp("./supervisor",args+1);
+			execvp("./supervisor",ar);
 			perror("Supervisor Error");
 			_exit(1);
 	}
-		
-	for(i=0; i<nds && !space; i++)
-		if((*nodes)[i]==0) space=1;	
-	if(!space){
+	close(pf[0]);	
+
+	if(id==nds){
 		nds = nds + nds/2;
 		*nodes = realloc(*nodes,nds);
 		*pipes = realloc(*pipes,nds);
 	}
-	(*nodes)[i]= p;
-	(*pipes)[i]= pf[1];
+	(*nodes)[id]= p;
+	(*pipes)[id]= pf[1];
 	return nds;			
 }
