@@ -44,35 +44,42 @@ void recieveMesssage(int sig){
 }
 
 int newNode(char *args[], int argc, pid_t **nodes, int **pipes, int nds){
-	int id, i, p, pf[2];
+	int id, i, p, f, fd;
+	
+	char name[strlen(args[0])+4];
+	name[0]='n';
+	name[1]='o';
+	name[2]='d';
+	name[3]='e';
+	strcat(name,args[0]);
+ 	f = mkfifo(name, 0666);
 	
 	id = atoi(args[0]);
-	pipe(pf);
 	
-	char **ar = (char**)calloc(argc+1,sizeof(char*));
-	ar[0]="supervisor";
-	
-    for(i=1; args[i]; i++) ar[i]=args[i];
+	if(f>0){
+		fd = open(name,O_WRONLY); 
 
-	if((p=fork())==0){
-			close(pf[1]);
-			dup2(pf[0],0);
-			close(pf[0]);
+		char **ar = (char**)calloc(argc+1,sizeof(char*));
+		ar[0]="supervisor";
+	
+    	for(i=1; args[i]; i++) ar[i]=args[i];
+
+		if((p=fork())==0){
 			execvp("./supervisor",ar);
 			perror("jobTracker: supervisor: execvp: ");
 			_exit(1);
-	}
-	close(pf[0]);
+		}
 
-	if(id>=nds){
-		nds = nds + nds/2;
-		*nodes = realloc(*nodes,nds);
-		*pipes = realloc(*pipes,nds);
-	}
+		if(id>=nds){
+			nds = nds + nds/2;
+			*nodes = realloc(*nodes,nds);
+			*pipes = realloc(*pipes,nds);
+		}
 
-    free(ar);
-	(*nodes)[id]= p;
-	(*pipes)[id]= pf[1];
+    	free(ar);
+		(*nodes)[id]= p;
+		(*pipes)[id]= fd;
+	}else nds=-1;
 	return nds;			
 }
 
