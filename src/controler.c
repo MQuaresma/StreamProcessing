@@ -14,7 +14,7 @@ char **processCommand(char *command);
  */
 main(){
     
-    char command[PIPE_BUF], **args = NULL;
+    char command[PIPE_BUF], **args = NULL, noArgs[10];
     int i, controlerTracker[2];
     pid_t jobTrackerP;
 
@@ -33,9 +33,8 @@ main(){
                 for(i = 0; i < PIPE_BUF && read(0, command+i, 1) > 0 && *(command+i)!='\n'; i ++);
                 command[i] = 0;
                 args = processCommand(command);
-                for(i = 0; args[i]; printf("%s\n", args[i]), i ++);
+                write(controlerTracker[1], noArgs, sprintf(noArgs, "%d", i)); //no of arguments being sent
                 for(i = 0; args[i]; i ++) write(controlerTracker[1], args[i], strlen(args[i]));
-                write(controlerTracker[1], ";", 1);  //signal finish of command
                 kill(jobTrackerP, SIGUSR1);
                 free(args);
             }
