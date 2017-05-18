@@ -63,3 +63,24 @@ void connect(char **cmd, pid_t *nodes, int *pd, short *status){
         }
     }else fprintf(stderr, "commands: connect: no nodes specified");
 }
+
+void inject (char *args[], int *pipes){
+	int id, pf[2], p;
+
+	id = atoi(args[1]);
+	
+	p = pipes[pf];
+	
+	if(p==0){
+		if(fork()==0){
+			dup(pf[1],1);
+			close(pf[1]);
+			close(pf[0]);
+			execvp(args[2], args+2);
+			perror("controler: inject: ");
+			_exit(1);
+		}
+		close(pf[0]);
+	}
+		
+} 
