@@ -16,7 +16,8 @@ void jobTracker(){
     ssize_t r;
     char cmd[INITS], **argv;
     pid_t *nodes = (pid_t*)calloc(INITS, sizeof(pid_t));
-
+	short *status = (short*)calloc(INITS, sizeof(short));
+	
     signal(SIGUSR1, recieveMesssage);
 
     while(1){
@@ -39,7 +40,7 @@ void jobTracker(){
 
 }
 
-int newNode(char *args[], int argc, pid_t **nodes, int **pipes, int nds){
+int newNode(char *args[], int argc, pid_t **nodes, int **pipes, int **status,int nds){
 	int id, i, p, f, fd;
 	
 	char name[strlen(args[0])+4];
@@ -55,7 +56,7 @@ int newNode(char *args[], int argc, pid_t **nodes, int **pipes, int nds){
 	if(f>0){
 		fd = open(name,O_WRONLY); 
 
-		char **ar = (char**)calloc(argc+1,sizeof(char*));
+		char **ar = (char**)calloc(argc+1,sizeof(void*));
 		ar[0]="supervisor";
 	
     	for(i=1; args[i]; i++) ar[i]=args[i];
@@ -70,17 +71,19 @@ int newNode(char *args[], int argc, pid_t **nodes, int **pipes, int nds){
 			nds = nds + nds/2;
 			*nodes = realloc(*nodes,nds);
 			*pipes = realloc(*pipes,nds);
+			*status = realloc(*status,nds);
 		}
 
     	free(ar);
-		(*nodes)[id]= p;
-		(*pipes)[id]= fd;
+		(*nodes)[id] = p;
+		(*pipes)[id] = fd;
+		(*pipes)[id] = 1;
 	}else nds=-1;
 	return nds;			
 }
 
 char **readMessage(int argc){
-    char **res = (char**)calloc(argc, sizeof(char*)), buf[INITS];
+    char **res = (char**)calloc(argc, sizeof(void*)), buf[INITS];
 
     for(int i = 0; i < n-1 && (r = read(0, buf, INITS))>0; i ++){
         buf[r] = 0;
