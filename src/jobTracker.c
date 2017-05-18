@@ -11,14 +11,11 @@ void connect(char **, pid_t*);
 char **readMessage(int argc);
 
 void jobTracker(){
-
     int argc, nNodes=INITS;
     ssize_t r;
     char cmd[INITS], **argv;
     pid_t *nodes = (pid_t*)calloc(INITS, sizeof(pid_t));
 	short *status = (short*)calloc(INITS, sizeof(short));
-	
-    signal(SIGUSR1, recieveMesssage);
 
     while(1){
         pause();
@@ -28,8 +25,8 @@ void jobTracker(){
         r = read(0, cmd, INITS); //read command to be executed
         if(r > 0){
             argv = readMessage(argc);
-            if(!strncmp(cmd, "node", r)) nNodes = newNode(argv, argc, &nodes, nNodes);
-            else if(!strncmp(cmd, "connect", r)) connect(argv, nodes);
+            if(!strncmp(cmd, "node", r)) nNodes = newNode(argv, argc, &nodes, &status, nNodes);
+            else if(!strncmp(cmd, "connect", r)) connect(argv, nodes, status);
 
             for(int i = 0; argv[i]; i ++) free(argv[i]);
             free(argv);
@@ -37,10 +34,9 @@ void jobTracker(){
     }
 
     free(nodes);
-
 }
 
-int newNode(char *args[], int argc, pid_t **nodes, int **pipes, int **status,int nds){
+int newNode(char *args[], int argc, pid_t **nodes, int **pipes, short **status,int nds){
 	int id, i, p, f, fd;
 	
 	char name[strlen(args[0])+4];
@@ -69,9 +65,9 @@ int newNode(char *args[], int argc, pid_t **nodes, int **pipes, int **status,int
 
 		if(id>=nds){
 			nds = nds + nds/2;
-			*nodes = realloc(*nodes,nds);
-			*pipes = realloc(*pipes,nds);
-			*status = realloc(*status,nds);
+			*nodes = (pid_t*)realloc(*nodes,nds);
+			*pipes = (int*)realloc(*pipes,nds);
+			*status = (short*)realloc(*status,nds);
 		}
 
     	free(ar);
@@ -93,7 +89,7 @@ char **readMessage(int argc){
    return res; 
 }
 
-void connect(char **cmd, pid_t *nodes, int *pd){
+void connect(char **cmd, pid_t *nodes, int *pd, short *status){
     pid_t dest;
     char pipeName[strlen(*cmd)+3]={0};
 
@@ -105,6 +101,7 @@ void connect(char **cmd, pid_t *nodes, int *pd){
         strcat(pipeName, ";");
         while(*++cmd){
             dest = atoi(*cmd);
+            status[dest] = 0;
             write(pd[dest], pipeName, strlen(*cmd)+3);
         }
     }else fprintf(stderr, "jobTracker: connect: no nodes specified");

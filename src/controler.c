@@ -14,8 +14,8 @@ char **processCommand(char *command);
  */
 main(){
     
-    char command[PIPE_BUF], **args = NULL, noArgs[10];
-    int i, controlerTracker[2];
+    char command[PIPE_BUF], **args = NULL, noArgsA[10];
+    int i, controlerTracker[2], noArgs;
     pid_t jobTrackerP;
 
     // Establish a way of communication between job tracker and controler
@@ -24,6 +24,7 @@ main(){
             dup2(controlerTracker[0], 0); //stdin becomes output of pipe
             close(controlerTracker[0]);
             close(controlerTracker[1]); //close input end to avoid conflicts
+            jobTracker();
             printf("Dummy print\n");
             exit(0);
             //job tracker code
@@ -32,8 +33,8 @@ main(){
             while(1){
                 for(i = 0; i < PIPE_BUF && read(0, command+i, 1) > 0 && *(command+i)!='\n'; i ++);
                 command[i] = 0;
-                args = processCommand(command);
-                write(controlerTracker[1], noArgs, sprintf(noArgs, "%d", i)); //no of arguments being sent
+                args = processCommand(command, &noArgs);
+                write(controlerTracker[1], noArgsA, sprintf(noArgsA, "%d", noArgs)); //no of arguments being sent
                 for(i = 0; args[i]; i ++) write(controlerTracker[1], args[i], strlen(args[i]));
                 kill(jobTrackerP, SIGUSR1);
                 free(args);
@@ -47,7 +48,7 @@ main(){
  * @param command Line to be parsed
  * @return Array of pointers to the different arguments
 */
-char **processCommand(char *command){
+char **processCommand(char *command, int *noArgs){
 
     char **args;
     int i, words;
@@ -55,6 +56,7 @@ char **processCommand(char *command){
     for(i = 0, words = 1; *(command+i); words += isspace(*(command+i)), i ++);
 
     args = (char**)calloc(words, sizeof(char));
+    *noArgs = i;
 
     i = 0;
     args[i] = strtok(command, " ");
