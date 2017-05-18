@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <unistd.h>
-#include <strings.h>
+#include <string.h>
 #include <signal.h>
 #define INITS 20
 #define CONNECTIN ";c"
@@ -17,24 +17,22 @@ char **processCommand(char *, int *);
 */
 
 main(){
+    pid_t *nodes = (pid_t*)calloc(INITS, sizeof(pid_t));
+	short *status = (short*)calloc(INITS, sizeof(short)), input=0;
+    char cmd[PIPE_BUF], **argv;
     int argc, nNodes=INITS;
     ssize_t r;
-    char cmd[INITS], **argv;
-    pid_t *nodes = (pid_t*)calloc(INITS, sizeof(pid_t));
-	short *status = (short*)calloc(INITS, sizeof(short));
 
     while(1){
-        pause();
-        r = read(0, cmd, INITS);
-        cmd[r] = 0;
-        argc = atoi(cmd);
-        r = read(0, cmd, INITS); //read command to be executed
-        if(r > 0){
-            argv = readMessage(argc);
-            if(!strncmp(cmd, "node", r)) nNodes = newNode(argv, argc, &nodes, &status, nNodes);
-            else if(!strncmp(cmd, "connect", r)) connect(argv, nodes, status);
-
-            for(int i = 0; argv[i]; i ++) free(argv[i]);
+        for(int i = 0; read(0, cmd+i, 1) > 0 *(cmd+i) != '\n'; input = (*(cmd+i) == ':'), i ++);
+        cmd[i] = 0;
+        if(input){
+            //send input to nodes
+        }else{
+            argv = processCommand(cmd, &argc);
+            if(!strncmp(*argv, "node", 4)) nNodes = newNode(argv, argc1, &nodes, &status, nNodes);
+            else if(!strncmp(*argv, "connect", 7)) connect(argv, nodes, status);
+            else if(!strncmp(*argv, "inject", 6)) ;            
             free(argv);
         }
     }
@@ -84,17 +82,10 @@ int newNode(char *args[], int argc, pid_t **nodes, int **pipes, short **status,i
 	return nds;			
 }
 
-char **readMessage(int argc){
-    char **res = (char**)calloc(argc, sizeof(void*)), buf[INITS];
-
-    for(int i = 0; i < n-1 && (r = read(0, buf, INITS))>0; i ++){
-        buf[r] = 0;
-        res[i] = strndup(buf, r); 
-    }
-
-   return res; 
-}
-
+/*
+ * 
+ *
+ */
 void connect(char **cmd, pid_t *nodes, int *pd, short *status){
     pid_t dest;
     char pipeName[strlen(*cmd)+3]={0};
@@ -134,4 +125,3 @@ char **processCommand(char *command, int *noArgs){
 
      return args;
 }
-
