@@ -4,7 +4,6 @@
 #include <signal.h>
 #define INITS 20
 
-char **readMessage(int argc);
 char **processCommand(char *, int *);
 
 /*

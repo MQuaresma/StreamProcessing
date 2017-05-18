@@ -9,29 +9,25 @@
 #define DCONNECTIN ";d"
 
 int newNode(char *args[], int argc, pid_t **nodes, int **pipes, short **status,int nds){
-	int id, i, p, f, fd;
+	int id, p, f, fd;
 
-	char name[strlen(args[0])+4];
+	char name[strlen(args[1])+4];
 	name[0]='n';
 	name[1]='o';
 	name[2]='d';
 	name[3]='e';
-	strcat(name,args[0]);
+	strcat(name,args[1]);
 	f = mkfifo(name, 0666);
 
-	id = atoi(args[0]);
+	id = atoi(args[1]);
 
 	if(f>0){
 		fd = open(name,O_WRONLY);
-
-		char **ar = (char**)calloc(argc+1,sizeof(void*));
-		ar[0]="supervisor";
-
-		for(i=1; args[i]; i++) ar[i]=args[i];
+		args[0]="supervisor";
 
 		if((p=fork())==0){
-			execvp("./supervisor",ar);
-			perror("jobTracker: supervisor: execvp: ");
+			execvp("./supervisor",args);
+			perror("controler: newNode: execvp: ");
 			_exit(1);
 		}
 
@@ -42,7 +38,6 @@ int newNode(char *args[], int argc, pid_t **nodes, int **pipes, short **status,i
 			*status = (short*)realloc(*status,nds);
 		}
 
-		free(ar);
 		(*nodes)[id] = p;
 		(*pipes)[id] = fd;
         (*pipes)[id] = 1;
@@ -65,5 +60,5 @@ void connect(char **cmd, pid_t *nodes, int *pd, short *status){
 			status[dest] = 0;
             write(pd[dest], pipeName, strlen(*cmd)+3);
         }
-    }else fprintf(stderr, "jobTracker: connect: no nodes specified");
+    }else fprintf(stderr, "controler: connect: no nodes specified");
 }
