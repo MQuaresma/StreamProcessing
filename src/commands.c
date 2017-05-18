@@ -27,7 +27,7 @@ int newNode(char *args[], int argc, pid_t **nodes, int **pipes, short **status,i
 
 		if((p=fork())==0){
 			execvp("./supervisor",args);
-			perror("controler: newNode: execvp: ");
+			perror("commands: newNode: execvp: ");
 			_exit(1);
 		}
 
@@ -60,5 +60,5 @@ void connect(char **cmd, pid_t *nodes, int *pd, short *status){
 			status[dest] = 0;
             write(pd[dest], pipeName, strlen(*cmd)+3);
         }
-    }else fprintf(stderr, "controler: connect: no nodes specified");
+    }else fprintf(stderr, "commands: connect: no nodes specified");
 }

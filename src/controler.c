@@ -31,7 +31,7 @@ main(){
             free(argv);
         }
     }
-
+    free(status);
     free(nodes);
 }
 
