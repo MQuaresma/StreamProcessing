@@ -28,7 +28,7 @@ main(){
         }else{
             argv = processCommand(cmd, &argc);
             if(!strncmp(*argv, "node", 4)) nNodes = newNode(argv, argc1, &nodes, &pipes, &status, nNodes);
-            else if(!strncmp(*argv, "connect", 7)) connect(argv, nodes, status);
+            else if(!strncmp(*argv, "connect", 7)) connect(argv, nodes, pipes, status);
             else if(!strncmp(*argv, "inject", 6)) ;            
             free(argv);
         }
