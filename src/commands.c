@@ -24,6 +24,7 @@ int newNode(char *args[], int argc, pid_t **nodes, int **pipes, short **status,i
 	if(f>0){
 		fd = open(name,O_WRONLY);
 		args[0]="supervisor";
+		args[1]=name;
 
 		if((p=fork())==0){
 			execvp("./supervisor",args);
