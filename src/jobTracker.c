@@ -3,6 +3,8 @@
 #include <strings.h>
 #include <signal.h>
 #define INITS 20
+#define CONNECTIN ";c"
+#define DCONNECTIN ";d"
 
 int newNode(char **, int, pid_t**, int **, int);
 void connect(char **, pid_t*);
@@ -34,12 +36,6 @@ void jobTracker(){
     }
 
     free(nodes);
-
-}
-
-void recieveMesssage(int sig){
-
-   if(sig == SIGUSR2) kill(getpid(), SIGINT);
 
 }
 
@@ -95,25 +91,18 @@ char **readMessage(int argc){
 }
 
 void connect(char **cmd, pid_t *nodes, int *pd){
-    pid_t src, dest;
-    char pipeName[10]={0};
-    int len;
+    pid_t dest;
+    char pipeName[strlen(*cmd)+3]={0};
 
     if(*cmd){
-        src = atoi(*cmd); //id of the source node
-        len = strlen(src);
-        pipeName[len] = 0;
-        strcat(pipeName, src);
-        strcat(pipeName, "-");
-        len ++;
+        // commands from the jobTracker are delimited by semi-colons
+        strcat(pipeName, CONNECTIN);
+        pipeName[3] = 0;
+        strcat(pipeName, *cmd);
+        strcat(pipeName, ";");
         while(*++cmd){
-            pipeName[len] = 0;
-            dest = atoi(*cmd); //get index of destination of output
-            strcat(pipeName, *cmd);  //name of the named pipe
-            kill(nodes[src], SIGUSR1); //warn src node to add a new output to it's list
-            write(pd[src], pipeName, strlen(pipeName));
-            kill(nodes[dest], SIGUSR2); //warn dest node that it's input has changed
-            write(pd[dest], pipeName, strlen(pipeName));
-        }    
-    }
+            dest = atoi(*cmd);
+            write(pd[dest], pipeName, strlen(*cmd)+3);
+        }
+    }else fprintf(stderr, "jobTracker: connect: no nodes specified");
 }
