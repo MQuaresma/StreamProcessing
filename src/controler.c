@@ -1,67 +1,137 @@
-#include<stdio.h>
-#include<ctype.h>
-#include<string.h>
-#include<stdlib.h>
-#include<fcntl.h>
-#include<signal.h>
-#include<unistd.h>
-#include<sys/syslimits.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <strings.h>
+#include <signal.h>
+#define INITS 20
+#define CONNECTIN ";c"
+#define DCONNECTIN ";d"
 
-char **processCommand(char *command);
+int newNode(char **, int, pid_t**, int **, int);
+void connect(char **, pid_t*);
+char **readMessage(int argc);
+char **processCommand(char *, int *);
+
 /*
- * Controller which reads lines from stdin, parses them and send the result to the job handler for 
- * scheduling between nodes.
- */
-main(){
-    
-    char command[PIPE_BUF], **args = NULL, noArgsA[10];
-    int i, controlerTracker[2], noArgs;
-    pid_t jobTrackerP;
+* Controller which reads lines from stdin, parses them and send the result to the job handler for
+* scheduling between nodes.
+*/
 
-    // Establish a way of communication between job tracker and controler
-    if(pipe(controlerTracker) != -1){
-        if(!(jobTrackerP=fork())){
-            dup2(controlerTracker[0], 0); //stdin becomes output of pipe
-            close(controlerTracker[0]);
-            close(controlerTracker[1]); //close input end to avoid conflicts
-            jobTracker();
-            printf("Dummy print\n");
-            exit(0);
-            //job tracker code
-        }else{
-            close(controlerTracker[0]);
-            while(1){
-                for(i = 0; i < PIPE_BUF && read(0, command+i, 1) > 0 && *(command+i)!='\n'; i ++);
-                command[i] = 0;
-                args = processCommand(command, &noArgs);
-                write(controlerTracker[1], noArgsA, sprintf(noArgsA, "%d", noArgs)); //no of arguments being sent
-                for(i = 0; args[i]; i ++) write(controlerTracker[1], args[i], strlen(args[i]));
-                kill(jobTrackerP, SIGUSR1);
-                free(args);
-            }
+main(){
+    int argc, nNodes=INITS;
+    ssize_t r;
+    char cmd[INITS], **argv;
+    pid_t *nodes = (pid_t*)calloc(INITS, sizeof(pid_t));
+	short *status = (short*)calloc(INITS, sizeof(short));
+
+    while(1){
+        pause();
+        r = read(0, cmd, INITS);
+        cmd[r] = 0;
+        argc = atoi(cmd);
+        r = read(0, cmd, INITS); //read command to be executed
+        if(r > 0){
+            argv = readMessage(argc);
+            if(!strncmp(cmd, "node", r)) nNodes = newNode(argv, argc, &nodes, &status, nNodes);
+            else if(!strncmp(cmd, "connect", r)) connect(argv, nodes, status);
+
+            for(int i = 0; argv[i]; i ++) free(argv[i]);
+            free(argv);
         }
-    }else fprintf(stderr, "Couldn't reach job tracker process, exiting...\n");
+    }
+
+    free(nodes);
+}
+
+int newNode(char *args[], int argc, pid_t **nodes, int **pipes, short **status,int nds){
+	int id, i, p, f, fd;
+	
+	char name[strlen(args[0])+4];
+	name[0]='n';
+	name[1]='o';
+	name[2]='d';
+	name[3]='e';
+	strcat(name,args[0]);
+ 	f = mkfifo(name, 0666);
+	
+	id = atoi(args[0]);
+	
+	if(f>0){
+		fd = open(name,O_WRONLY); 
+
+		char **ar = (char**)calloc(argc+1,sizeof(void*));
+		ar[0]="supervisor";
+	
+    	for(i=1; args[i]; i++) ar[i]=args[i];
+
+		if((p=fork())==0){
+			execvp("./supervisor",ar);
+			perror("jobTracker: supervisor: execvp: ");
+			_exit(1);
+		}
+
+		if(id>=nds){
+			nds = nds + nds/2;
+			*nodes = (pid_t*)realloc(*nodes,nds);
+			*pipes = (int*)realloc(*pipes,nds);
+			*status = (short*)realloc(*status,nds);
+		}
+
+    	free(ar);
+		(*nodes)[id] = p;
+		(*pipes)[id] = fd;
+		(*pipes)[id] = 1;
+	}else nds=-1;
+	return nds;			
+}
+
+char **readMessage(int argc){
+    char **res = (char**)calloc(argc, sizeof(void*)), buf[INITS];
+
+    for(int i = 0; i < n-1 && (r = read(0, buf, INITS))>0; i ++){
+        buf[r] = 0;
+        res[i] = strndup(buf, r); 
+    }
+
+   return res; 
+}
+
+void connect(char **cmd, pid_t *nodes, int *pd, short *status){
+    pid_t dest;
+    char pipeName[strlen(*cmd)+3]={0};
+
+    if(*cmd){
+        // commands from the jobTracker are delimited by semi-colons
+        strcat(pipeName, CONNECTIN);
+        pipeName[3] = 0;
+        strcat(pipeName, *cmd);
+        strcat(pipeName, ";");
+        while(*++cmd){
+            dest = atoi(*cmd);
+            status[dest] = 0;
+            write(pd[dest], pipeName, strlen(*cmd)+3);
+        }
+    }else fprintf(stderr, "jobTracker: connect: no nodes specified");
 }
 
 /*
  * Split a line into it's individual parameters
  * @param command Line to be parsed
  * @return Array of pointers to the different arguments
-*/
+ */
 char **processCommand(char *command, int *noArgs){
 
-    char **args;
-    int i, words;
+     char **args;
+     int i, words;
 
-    for(i = 0, words = 1; *(command+i); words += isspace(*(command+i)), i ++);
+     for(i = 0, words = 1; *(command+i); words += isspace(*(command+i)), i ++);
 
-    args = (char**)calloc(words, sizeof(char));
-    *noArgs = i;
+     args = (char**)calloc(words, sizeof(char));
+     *noArgs = i;
 
-    i = 0;
-    args[i] = strtok(command, " ");
-    while(args[i++]) args[i] = strtok(NULL, " ");
+     i = 0;
+     args[i] = strtok(command, " ");
+     while(args[i++]) args[i] = strtok(NULL, " ");
 
-    return args;
-
+     return args;
 }
+
