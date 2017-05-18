@@ -14,7 +14,8 @@ char **processCommand(char *, int *);
 main(){
     pid_t *nodes = (pid_t*)calloc(INITS, sizeof(pid_t));
 	short *status = (short*)calloc(INITS, sizeof(short)), input=0;
-    char cmd[PIPE_BUF], **argv;
+    int *pipes = (int*)calloc(INITS, sizeof(int));
+	char cmd[PIPE_BUF], **argv;
     int argc, nNodes=INITS;
     ssize_t r;
 
@@ -22,10 +23,11 @@ main(){
         for(int i = 0; read(0, cmd+i, 1) > 0 *(cmd+i) != '\n'; input = (*(cmd+i) == ':'), i ++);
         cmd[i] = 0;
         if(input){
-            //send input to nodes
+			for(i=0; i<nNodes; i++)
+				if(status[i]) write(pipes[i],cmd,strlen(cmd)); 
         }else{
             argv = processCommand(cmd, &argc);
-            if(!strncmp(*argv, "node", 4)) nNodes = newNode(argv, argc1, &nodes, &status, nNodes);
+            if(!strncmp(*argv, "node", 4)) nNodes = newNode(argv, argc1, &nodes, &pipes, &status, nNodes);
             else if(!strncmp(*argv, "connect", 7)) connect(argv, nodes, status);
             else if(!strncmp(*argv, "inject", 6)) ;            
             free(argv);
