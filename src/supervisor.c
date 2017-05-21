@@ -34,8 +34,6 @@ main(int argc, char *argv[]){
             perror("supervisor: execvp: ");
             _exit(1);
         }else{
-            close(nPipeIN[0]);
-            close(nPipeOUT[1]);
             if(!fork()){ 
                 dup2(fd, 0);     
                 dup2(nPipeIN[1], 1);
@@ -44,7 +42,7 @@ main(int argc, char *argv[]){
                 close(nPipeOUT[1]);
                 close(nPipeOUT[0]);
                 close(fd);
-                manInput();
+                manInput(nPIPEOUT[1]);
             }
             if(!fork()){
                 dup2(nPIPEOUT[0], 0); 
@@ -55,6 +53,8 @@ main(int argc, char *argv[]){
                 close(fd);
                 manOutput();
             }
+            close(nPipeIN[0]);
+            close(nPipeOUT[1]);
             wait(NULL);
         }
     }else perror("supervisor: ");
@@ -62,11 +62,16 @@ main(int argc, char *argv[]){
 }
 
 
-void manInput(void){
+void manInput(int cmdPipe){
 
+    char buf[PIPE_BUF];
 
-
-
+    while((r=read(0,buf,PIPE_BUF))>0){
+        if(buf[0]=';'){
+            buf[r]='\n';
+            write(cmdPipe,buf,r+1);
+        }else write(1,buf,r);
+    }   
 }
 
 
