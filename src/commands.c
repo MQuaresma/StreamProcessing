@@ -57,7 +57,7 @@ void connect(char **cmd, pid_t *nodes, int *pd, short *status){
 	    strcat(pipeName, CONNECTIN);
 	    pipeName[3] = 0;
         strcat(pipeName, *cmd);
-	    strcat(pipeName, ";");
+	    strcat(pipeName, "\n");
         while(*++cmd){
 			dest = atoi(*cmd);
 			status[dest] = 0;
@@ -82,7 +82,6 @@ void inject(char *args[], int *pipes){
 		_exit(1);
 	}
     wait(NULL);
-		
 } 
 
 /*
@@ -98,7 +97,7 @@ void disconnect(char *args[], int *pipes){
 	strcat(pipeName, DCONNECTIN);
 	pipeName[3] = 0;
 	strcat(pipeName, argv+2);
-	strcat(pipeName, ";");
+	strcat(pipeName, "\n");
 
 	pipes[id2] = 0; //change source of id2
 

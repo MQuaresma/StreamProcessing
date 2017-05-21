@@ -54,7 +54,11 @@ main(int argc, char *argv[]){
                 manOutput();
             }
             close(nPipeIN[0]);
+            close(nPipeIN[1]);
             close(nPipeOUT[1]);
+            close(nPipeOUT[0]);
+            close(fd);
+            free(args);
             wait(NULL);
         }
     }else perror("supervisor: ");
@@ -63,7 +67,6 @@ main(int argc, char *argv[]){
 
 
 void manInput(int cmdPipe){
-
     char buf[PIPE_BUF];
 
     while((r=read(0,buf,PIPE_BUF))>0){
@@ -77,7 +80,44 @@ void manInput(int cmdPipe){
 
 void manOutput(void){
 
-    int *pipes = (int*)calloc(INITS, sizeof(int));
+    int *pipes = (int*)calloc(INITS, sizeof(int)), i, nOut=0, defIn = open("/dev/null", O_RDONLY), idT, size=INITS;
+    ssize_t r;
+    char buf[PIPEBUF], pipeName[10];
 
 
+    while(1){
+        for(i = 0; read(0, buf+i, 1) > 0 && *(buf+i) != '\n' && i < PIPEBUF; i ++);
+        if(buf[0] == ';'){ //check if it is a command
+            if(i > 2){
+                buf[i] = 0;
+                idT = atoi(buf+2);
+                switch(buf[1]){
+                    case 'c':
+                        getPipeName(buf+2, pipeName);
+                        if((pipes[idT] = open(pipeName, O_WRONLY)) < 0) pipes[idT] = 0;
+                    case 'd':
+                        close(pipes[idT]);
+                        pipes[idT] = 0;
+                        break;
+                    default:
+                        break;
+                }  
+
+            }else fprintf(stderr, "supervisor: manOutput: Invalid command\n"); 
+        }else{ 
+            if(!nOut) write(defIn, buf, i); //output to /dev/null if no input is specified
+            else 
+                for(int j = 0; j < INITS; j ++)
+                    if(pipes[j]) write(pipes[j], buf, i);
+        }    
+    }
+}
+
+
+void getPipeName(char *id, char *buf){
+	buf[0]='n';
+	buf[1]='o';
+	buf[2]='d';
+	buf[3]='e';
+	strcat(buf,id);
 }
