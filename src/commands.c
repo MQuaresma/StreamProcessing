@@ -3,8 +3,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+#include <sys/types.h> #include <sys/stat.h>
 #define CONNECTIN ";c"
 #define DCONNECTIN ";d"
 
@@ -46,6 +45,9 @@ int newNode(char *args[], int argc, pid_t **nodes, int **pipes, short **status,i
 	return nds;
 }
 
+/*
+ * Connects one node's output to the input of certain amount of nodes
+ */
 void connect(char **cmd, pid_t *nodes, int *pd, short *status){
 	pid_t dest;
 	char pipeName[strlen(*cmd)+3]={0};
@@ -64,7 +66,11 @@ void connect(char **cmd, pid_t *nodes, int *pd, short *status){
     }else fprintf(stderr, "commands: connect: no nodes specified");
 }
 
-void inject (char *args[], int *pipes){
+/*
+ * Injects the output of executing the command given into the node
+ * specified
+ */
+void inject(char *args[], int *pipes){
 	int id, pf[2];
     
     id = atoi(arg[1]);
@@ -78,3 +84,23 @@ void inject (char *args[], int *pipes){
     wait(NULL);
 		
 } 
+
+/*
+ * Disconnects two nodes 
+ */
+void disconnect(char *args[], int *pipes){
+
+	int id1, id2;
+	char pipeName[strlen(argv+2)+3]={0};
+
+	id1 = atoi(argv[1]);
+	id2 = atoi(argv[2]);
+	strcat(pipeName, DCONNECTIN);
+	pipeName[3] = 0;
+	strcat(pipeName, argv+2);
+	strcat(pipeName, ";");
+
+	pipes[id2] = 0; //change source of id2
+
+	write(pipes[id1], pipeName, strlen(pipeName)); //remove id2 from the nodes that id1 outputs to
+}
