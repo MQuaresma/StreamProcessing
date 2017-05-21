@@ -18,6 +18,6 @@
 ## Controler
 - [x] node <id> <cmd> <args...>
 - [x] connect <id> <ids...>
-- [ ] disconnect <id1> <id2>
-- [ ] inject <id> <cmd> <args..>
+- [x] disconnect <id1> <id2>
+- [x] inject <id> <cmd> <args..>
 - [ ] remove <id>
