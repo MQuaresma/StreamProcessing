@@ -65,12 +65,16 @@ main(int argc, char *argv[]){
 void manInput(int cmdPipe){
 
     char buf[PIPE_BUF];
+    char c;
+    int i=0;
 
-    while((r=read(0,buf,PIPE_BUF))>0){
-        if(buf[0]=';'){
-            buf[r]='\n';
-            write(cmdPipe,buf,r+1);
-        }else write(1,buf,r);
+    while(read(0,&c,1)>0){
+        if(c=='\n'){
+            buf[i++]=c;
+            if(buf[0]==';') write(cmdPipe,buf,i);
+            else write(1,buf,i);
+            i=0;
+        }else buf[i++]=c; 
     }   
 }
 
