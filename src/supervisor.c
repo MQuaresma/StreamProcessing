@@ -29,7 +29,7 @@ main(int argc, char *argv[]){
             close(fd);
             execN = (char*)calloc(3+strlen(argv[2]), sizeof(char));
             strcpy(execN, "./");
-            strcat(execN, args+2);
+            strcat(execN, *(args+2));
             execvp(execN, args+2);
             perror("supervisor: execvp: ");
             _exit(1);
@@ -42,10 +42,10 @@ main(int argc, char *argv[]){
                 close(nPipeOUT[1]);
                 close(nPipeOUT[0]);
                 close(fd);
-                manInput(nPIPEOUT[1]);
+                manInput(nPipeOUT[1]);
             }
             if(!fork()){
-                dup2(nPIPEOUT[0], 0); 
+                dup2(nPipeOUT[0], 0); 
                 close(nPipeIN[1]);
                 close(nPipeIN[0]);
                 close(nPipeOUT[1]);
@@ -86,11 +86,11 @@ void manOutput(void){
 
     int *pipes = (int*)calloc(INITS, sizeof(int)), i, nOut=0, defIn = open("/dev/null", O_RDONLY), idT, size=INITS;
     ssize_t r;
-    char buf[PIPEBUF], pipeName[10];
+    char buf[PIPE_BUF], pipeName[10];
 
 
     while(1){
-        for(i = 0; read(0, buf+i, 1) > 0 && *(buf+i) != '\n' && i < PIPEBUF; i ++);
+        for(i = 0; read(0, buf+i, 1) > 0 && *(buf+i) != '\n' && i < PIPE_BUF; i ++);
         if(buf[0] == ';'){ //check if it is a command
             if(i > 2){
                 buf[i] = 0;

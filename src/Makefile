@@ -1,8 +1,8 @@
 CC=gcc
 #CFLAGS=
 #LIBS=
-DEP=commands.o controler.o supervisor.o
-OBJ=window filter spawn const 
+DEP=commands.o controler.o
+OBJ=window filter spawn const supervisor
 
 controler: $(OBJ) $(DEP)
 	$(CC) -o indieStorm $(DEP)
@@ -10,8 +10,8 @@ controler: $(OBJ) $(DEP)
 controler.o: controler.c
 	$(CC) -c controler.c
 
-supervisor.o: supervisor.c
-	$(CC) -c supervisor.c
+supervisor: supervisor.c
+	$(CC) -o supervisor supervisor.c
 
 commands.o: commands.c
 	$(CC) -c commands.c
