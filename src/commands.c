@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <sys/types.h> 
 #include <sys/stat.h>
+#include <limits.h>
 #define CONNECTIN ";c"
 #define DCONNECTIN ";d"
 
@@ -51,7 +52,7 @@ int newNode(char *args[], int argc, pid_t **nodes, int **pipes, short **status,i
  */
 void connect(char **cmd, pid_t *nodes, int *pd, short *status){
 	pid_t dest;
-	char *pipeName = (char*)calloc(strlen(*args)+3, char);
+	char *pipeName = (char*)calloc(strlen(*cmd)+3, sizeof(char));
 
     if(*cmd){
     	// commands from the jobTracker are delimited by semi-colons
@@ -91,17 +92,17 @@ void inject(char *args[], int *pipes){
  */
 void disconnect(char *args[], int *pipes){
 	int id1, id2;
-	char *pipeName = (char*)calloc(strlen(*args)+2, char);
+	char *pipeName = (char*)calloc(strlen(*args)+2, sizeof(char));
 
 	id1 = atoi(args[1]);
 	id2 = atoi(args[2]);
 	strcat(pipeName, DCONNECTIN);
 	pipeName[3] = 0;
-	strcat(pipeName, args+2);
+	strcat(pipeName, *(args+2));
 	strcat(pipeName, "\n");
 
 	pipes[id2] = 0; //change source of id2
 
 	write(pipes[id1], pipeName, strlen(pipeName)); //remove id2 from the nodes that id1 outputs to
-    free(pipName);
+    free(pipeName);
 }

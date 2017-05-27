@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <signal.h>
+#include <limits.h>
 #define INITS 20
 
 char **processCommand(char *, int *);
@@ -16,18 +17,18 @@ main(){
 	short *status = (short*)calloc(INITS, sizeof(short)), input=0;
     int *pipes = (int*)calloc(INITS, sizeof(int));
 	char cmd[PIPE_BUF], **argv;
-    int argc, nNodes=INITS;
+    int argc, nNodes=INITS, i;
     ssize_t r;
 
     while(1){
-        for(int i = 0; read(0, cmd+i, 1) > 0 *(cmd+i) != '\n'; input = (*(cmd+i) == ':'), i ++);
+        for(i = 0; read(0, cmd+i, 1) > 0 *(cmd+i) != '\n'; input = (*(cmd+i) == ':'), i ++);
         cmd[i] = 0;
         if(input){
 			for(i=0; i<nNodes; i++)
 				if(status[i]) write(pipes[i],cmd,strlen(cmd)); 
         }else{
             argv = processCommand(cmd, &argc);
-            if(!strncmp(*argv, "node", 4)) nNodes = newNode(argv, argc1, &nodes, &pipes, &status, nNodes);
+            if(!strncmp(*argv, "node", 4)) nNodes = newNode(argv, argc, &nodes, &pipes, &status, nNodes);
             else if(!strncmp(*argv, "connect", 7)) connect(argv, nodes, pipes, status);
             else if(!strncmp(*argv, "inject", 6)) inject(argv, pipes);
             else if(!strncmp(*argv, "disconnect", 10)) disconnect();            
