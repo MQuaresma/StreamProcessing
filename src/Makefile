@@ -27,3 +27,6 @@ window: window.c
 
 spawn: spawn.c
 	$(CC) -o spawn spawn.c
+
+clean: 
+	rm -rf const filter window spawn controler *.o
