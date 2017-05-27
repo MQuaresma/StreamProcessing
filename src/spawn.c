@@ -1,9 +1,6 @@
 #include <stdio.h>
-#include <limits.h>
-#include <unistd.h>
-#include <string.h>
-#include <stdlib.h>
 #include <sys/wait.h>
+#include "iStormAPI.h"
 
 int mySystem(char *arg[]){
 	int ret=1;

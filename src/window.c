@@ -1,9 +1,5 @@
-#include <limits.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-
+#include "iStormAPI.h"
 
 void getValues(int op, int line, int col);
 int getMin(int *buf, int v);

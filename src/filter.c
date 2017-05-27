@@ -1,7 +1,4 @@
-#include <string.h>
-#include <stdlib.h>
-#include <limits.h>
-#include <unistd.h>
+#include "iStormAPI.h"
 
 int main(int argc, char* argv[]) {
 	char n[10];
