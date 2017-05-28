@@ -16,10 +16,18 @@ int main(int argc, char *argv[]){
     if(fd > 0){
         pipe(nPipeIN);
         pipe(nPipeOUT);
+        
+        args = (char**)calloc(argc-1, sizeof(void*));
+        for(int i = 0; i < argc-1; args[i] = argv[i+2], i ++); //prepare arguments to be passed to execvp
+
+        if(!strcmp(*args,"const") || !strcmp(*args,"window") || !strcmp(*args,"filter") || !strcmp(*args,"spawn")){
+            execN = (char*)calloc(2+strlen(argv[2]), sizeof(char));
+            execN[0] = '.';
+            execN[1] = '/';
+        }else execN = (char*)calloc(strlen(argv[2]), sizeof(char));
+        strcat(execN, *args);
 
         if(!(proc = fork())){
-            args = (char**)calloc(argc-1, sizeof(void*));
-            for(int i = 0; i < argc-1; args[i] = argv[i+2], i ++); //prepare arguments to be passed to execvp
             dup2(nPipeIN[0], 0);
             dup2(nPipeOUT[1], 1);
             close(nPipeIN[1]);
@@ -27,10 +35,6 @@ int main(int argc, char *argv[]){
             close(nPipeOUT[1]);
             close(nPipeOUT[0]);
             close(fd);
-            execN = (char*)calloc(3+strlen(argv[2]), sizeof(char));
-            execN[0] = '.';
-            execN[1] = '/';
-            strcat(execN, *args);
             execvp(execN, args);
             perror("supervisor: execvp: ");
             _exit(1);
