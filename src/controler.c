@@ -26,6 +26,7 @@ int main(){
             printf("Input\n");
 			for(i=0; i<nNodes; i++)
 				if(status[i]) write(pipes[i],cmd,strlen(cmd)); 
+            input=0;
         }else{
             argv = processCommand(cmd, &argc);
             if(argc > 1){

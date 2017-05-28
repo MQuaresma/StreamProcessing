@@ -39,7 +39,6 @@ int main(int argc, char *argv[]){
                 dup2(nPipeIN[1], 1);
                 close(nPipeIN[1]);
                 close(nPipeIN[0]);
-                close(nPipeOUT[1]);
                 close(nPipeOUT[0]);
                 close(fd);
                 manInput(nPipeOUT[1]);
@@ -85,7 +84,7 @@ void manInput(int cmdPipe){
 
 void manOutput(void){
 
-    int *pipes = (int*)calloc(INITS, sizeof(int)), i, nOut=0, defIn = open("log", O_WRONLY), idT, size=INITS;
+    int *pipes = (int*)calloc(INITS, sizeof(int)), i, nOut=0, defIn = open("log", O_WRONLY,0666), idT, size=INITS;
     char buf[PIPE_BUF], pipeName[10];
 
     while(1){
@@ -100,6 +99,7 @@ void manOutput(void){
                         size *= 1.5;
                         if(idT >= size) pipes=(int*)realloc(pipes, sizeof(int)*size);
                         if((pipes[idT] = open(pipeName, O_WRONLY)) < 0) pipes[idT] = 0;
+                        nOut++;
                         break;
                     case 'd':
                         close(pipes[idT]);
