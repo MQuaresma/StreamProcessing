@@ -13,7 +13,7 @@ char **processCommand(char *, int *);
 
 int main(){
     pid_t *nodes = (pid_t*)calloc(INITS, sizeof(pid_t));
-	short *status = (short*)calloc(INITS, sizeof(short)), input=0;
+	int *status = (int*)calloc(INITS, sizeof(int)), input=0;
     int *pipes = (int*)calloc(INITS, sizeof(int)), len=0;
 	char cmd[PIPE_BUF], **argv;
     int argc, nNodes=INITS, i; 

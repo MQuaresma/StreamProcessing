@@ -33,6 +33,7 @@ int main(int argc, char *argv[]){
             execvp(execN, args+2);
             perror("supervisor: execvp: ");
             _exit(1);
+        }else{
             if(!fork()){ 
                 dup2(fd, 0);     
                 dup2(nPipeIN[1], 1);

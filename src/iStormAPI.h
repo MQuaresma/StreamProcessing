@@ -5,8 +5,8 @@
 #include <stdlib.h>
 
 //commands
-int newNode(char *[], int, pid_t **, int **, short **,int);
-void connect(char **, int *, short *);
+int newNode(char *[], int, pid_t **, int **, int **,int);
+void connect(char **, int *, int *);
 void inject(char *[], int *);
 void disconnect(char *[], int *);
 

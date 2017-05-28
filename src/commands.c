@@ -7,7 +7,7 @@
 #define CONNECTIN ";c"
 #define DCONNECTIN ";d"
 
-int newNode(char *args[], int argc, pid_t **nodes, int **pipes, short **status,int nds){
+int newNode(char *args[], int argc, pid_t **nodes, int **pipes, int **status,int nds){
 	int id, p, f, fd;
 
 	char name[strlen(args[1])+4];
@@ -34,14 +34,14 @@ int newNode(char *args[], int argc, pid_t **nodes, int **pipes, short **status,i
                 nds = nds + nds/2;
                *nodes = (pid_t*)realloc(*nodes,nds);
                *pipes = (int*)realloc(*pipes,nds); 
-               *status = (short*)realloc(*status,nds);
+               *status = (int*)realloc(*status,nds);
             }
                 
             fd = open(name,O_WRONLY);
             if(fd>0){
                 (*nodes)[id] = p;
                 (*pipes)[id] = fd;
-                (*pipes)[id] = 1;
+                (*status)[id] = 1;
             }else perror("newNode: Cannot open file"); 
         }else{
             perror("commands:");
@@ -54,10 +54,10 @@ int newNode(char *args[], int argc, pid_t **nodes, int **pipes, short **status,i
 /*
  * Connects one node's output to the input of certain amount of nodes
  */
-void connect(char **cmd, int *pd, short *status){
+void connect(char **cmd, int *pd, int *status){
 	pid_t dest, src;
 	char *pipeName = (char*)calloc(strlen(*cmd)+3, sizeof(char));
-
+    
     if(*cmd){
     	// commands from the jobTracker are delimited by semi-colons
         strcat(pipeName, CONNECTIN);
