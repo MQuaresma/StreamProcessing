@@ -1,32 +1,32 @@
 CC=gcc
-#CFLAGS=
+CFLAGS=-g -Wall
 #LIBS=
 DEP=commands.o controler.o
 OBJ=window filter spawn const supervisor
 
-controler: $(OBJ) $(DEP)
-	$(CC) -o indieStorm $(DEP)
+indieStorm: $(OBJ) $(DEP)
+	$(CC) $(CFLAGS) -o indieStorm $(DEP)
 
 controler.o: controler.c
-	$(CC) -c controler.c
+	$(CC) $(CFLAGS) -c controler.c
 
 supervisor: supervisor.c
-	$(CC) -o supervisor supervisor.c
+	$(CC) $(CFLAGS) -o supervisor supervisor.c
 
 commands.o: commands.c
-	$(CC) -c commands.c
+	$(CC) $(CFLAGS) -c commands.c
 
 const: const.c
-	$(CC) -o const const.c
+	$(CC) $(CFLAGS) -o const const.c
 
 filter: filter.c
-	$(CC) -o filter filter.c
+	$(CC) $(CFLAGS) -o filter filter.c
 
 window: window.c
-	$(CC) -o window window.c
+	$(CC) $(CFLAGS) -o window window.c
 
 spawn: spawn.c
-	$(CC) -o spawn spawn.c
+	$(CC) $(CFLAGS) -o spawn spawn.c
 
 clean: 
-	rm -rf const filter window spawn controler *.o
+	rm -rf const filter window spawn indieStorm supervisor *.o

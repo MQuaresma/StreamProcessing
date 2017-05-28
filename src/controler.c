@@ -13,24 +13,28 @@ char **processCommand(char *, int *);
 main(){
     pid_t *nodes = (pid_t*)calloc(INITS, sizeof(pid_t));
 	short *status = (short*)calloc(INITS, sizeof(short)), input=0;
-    int *pipes = (int*)calloc(INITS, sizeof(int));
+    int *pipes = (int*)calloc(INITS, sizeof(int)), len=0;
 	char cmd[PIPE_BUF], **argv;
     int argc, nNodes=INITS, i;
-    ssize_t r;
 
     while(1){
         for(i = 0; read(0, cmd+i, 1) > 0 && *(cmd+i) != '\n'; input = (*(cmd+i) == ':'), i ++);
         cmd[i] = 0;
         if(input){
+            printf("Input\n");
 			for(i=0; i<nNodes; i++)
 				if(status[i]) write(pipes[i],cmd,strlen(cmd)); 
         }else{
             argv = processCommand(cmd, &argc);
-            if(!strncmp(*argv, "node", 4)) nNodes = newNode(argv, argc, &nodes, &pipes, &status, nNodes);
-            else if(!strncmp(*argv, "connect", 7)) connect(argv, nodes, pipes, status);
-            else if(!strncmp(*argv, "inject", 6)) inject(argv, pipes);
-            else if(!strncmp(*argv, "disconnect", 10)) disconnect(argv, pipes);            
-            free(argv);
+            if(argc > 1){
+                len = strlen(*argv);
+                if(!strncmp(*argv, "node", (len < 4 ? len : 4))) nNodes = newNode(argv, argc, &nodes, &pipes, &status, nNodes);
+                else if(!strncmp(*argv, "connect", (len < 7 ? len : 7))) connect(argv, nodes, pipes, status);
+                else if(!strncmp(*argv, "inject", (len < 6 ? len : 6))) inject(argv, pipes);
+                else if(!strncmp(*argv, "disconnect", (len < 10 ? len : 10))) disconnect(argv, pipes);            
+                else if(!strncmp(*argv, "quit", (len < 4 ? len : 4))) exit(0);
+                free(argv);
+            }
         }
     }
     free(status);
