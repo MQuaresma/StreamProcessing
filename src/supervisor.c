@@ -12,7 +12,7 @@ main(int argc, char *argv[]){
     int nPipeIN[2], nPipeOUT[2];
     char **args=NULL, *execN=NULL;
     pid_t proc=0;
-    
+
     if(fd > 0){
         pipe(nPipeIN);
         pipe(nPipeOUT);
@@ -70,14 +70,16 @@ void manInput(int cmdPipe){
     char c;
     int i=0;
 
-    while(read(0,&c,1)>0){
-        if(c=='\n'){
-            buf[i++]=c;
-            if(buf[0]==';') write(cmdPipe,buf,i);
-            else write(1,buf,i);
-            i=0;
-        }else buf[i++]=c; 
-    }   
+    while(1){
+        while(read(0,&c,1)>0){
+            if(c=='\n'){
+                buf[i++]=c;
+                if(buf[0]==';') write(cmdPipe,buf,i);
+                else write(1,buf,i);
+                i=0;
+            }else buf[i++]=c; 
+        }   
+    }    
 }
 
 
@@ -85,7 +87,6 @@ void manOutput(void){
 
     int *pipes = (int*)calloc(INITS, sizeof(int)), i, nOut=0, defIn = open("log", O_WRONLY), idT, size=INITS;
     char buf[PIPE_BUF], pipeName[10];
-
 
     while(1){
         for(i = 0; read(0, buf+i, 1) > 0 && *(buf+i) != '\n' && i < PIPE_BUF; i ++);
@@ -109,7 +110,7 @@ void manOutput(void){
 
             }else fprintf(stderr, "supervisor: manOutput: Invalid command\n"); 
         }else{ 
-            if(!nOut) write(defIn, buf, i); //output to /dev/null if no input is specified
+            if(nOut<=0) write(defIn, buf, i); //output to /dev/null if no input is specified
             else 
                 for(int j = 0; j < INITS; j ++)
                     if(pipes[j]) write(pipes[j], buf, i);

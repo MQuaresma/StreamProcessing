@@ -1,3 +1,4 @@
+#include<fcntl.h>
 #include<signal.h>
 #include<ctype.h>
 #include "iStormAPI.h"
@@ -15,7 +16,8 @@ main(){
 	short *status = (short*)calloc(INITS, sizeof(short)), input=0;
     int *pipes = (int*)calloc(INITS, sizeof(int)), len=0;
 	char cmd[PIPE_BUF], **argv;
-    int argc, nNodes=INITS, i;
+    int argc, nNodes=INITS, i; 
+    int fd=open("log", O_CREAT);
 
     while(1){
         for(i = 0; read(0, cmd+i, 1) > 0 && *(cmd+i) != '\n'; input = (*(cmd+i) == ':'), i ++);

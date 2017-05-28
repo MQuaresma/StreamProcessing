@@ -21,11 +21,10 @@ int newNode(char *args[], int argc, pid_t **nodes, int **pipes, short **status,i
         f=mkfifo(name, 0666);
         id = atoi(args[1]);
 
-        if(f>0){
+        if(!f){
             fd = open(name,O_WRONLY);
             args[0]="supervisor";
             args[1]=name;
-
             if((p=fork())==0){
                 execvp("./supervisor",args);
                 perror("commands: newNode: execvp: ");
@@ -42,7 +41,10 @@ int newNode(char *args[], int argc, pid_t **nodes, int **pipes, short **status,i
             (*nodes)[id] = p;
             (*pipes)[id] = fd;
             (*pipes)[id] = 1;
-        }else nds=-1;
+        }else{
+            perror("commands:");
+            nds=-1;
+        }
     }else fprintf(stderr, "commands: newNode: Not enough arguments");
 	return nds;
 }
@@ -57,7 +59,6 @@ void connect(char **cmd, pid_t *nodes, int *pd, short *status){
     if(*cmd){
     	// commands from the jobTracker are delimited by semi-colons
 	    strcat(pipeName, CONNECTIN);
-	    pipeName[3] = 0;
         strcat(pipeName, *cmd);
 	    strcat(pipeName, "\n");
         while(*++cmd){
@@ -92,7 +93,7 @@ void inject(char *args[], int *pipes){
  */
 void disconnect(char *args[], int *pipes){
 	int id1, id2;
-	char *pipeName = (char*)calloc(strlen(*args)+2, sizeof(char));
+	char *pipeName = (char*)calloc(strlen(*args)+3, sizeof(char));
 
 	id1 = atoi(args[1]);
 	id2 = atoi(args[2]);
