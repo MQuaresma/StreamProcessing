@@ -21,16 +21,17 @@ int main(int argc, char *argv[]){
             args = (char**)calloc(argc-1, sizeof(void*));
             for(int i = 0; i < argc-1; args[i] = argv[i+2], i ++); //prepare arguments to be passed to execvp
             dup2(nPipeIN[0], 0);
-            //dup2(nPipeOUT[1], 1);
+            dup2(nPipeOUT[1], 1);
             close(nPipeIN[1]);
             close(nPipeIN[0]);
             close(nPipeOUT[1]);
             close(nPipeOUT[0]);
             close(fd);
             execN = (char*)calloc(3+strlen(argv[2]), sizeof(char));
-            execN="./";
-            strcat(execN, *(args+2));
-            execvp(execN, args+2);
+            execN[0]='.';
+            execN[1]='/';
+            strcat(execN, *args);
+            execvp(execN, args);
             perror("supervisor: execvp: ");
             _exit(1);
         }else{
@@ -110,6 +111,7 @@ void manOutput(void){
                 }  
 
             }else fprintf(stderr, "supervisor: manOutput: Invalid command\n"); 
+            buf[0]=0;
         }else{ 
             if(nOut<=0) write(defIn, buf, i); //output to /dev/null if no input is specified
             else 

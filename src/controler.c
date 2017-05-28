@@ -24,10 +24,7 @@ int main(){
         if(input){
             cmd[i+1] = 0;
 			for(i=0; i<nNodes; i++)
-				if(status[i]){ 
-                    fprintf(stderr, "%s", cmd);
-                    write(pipes[i],cmd,strlen(cmd)); 
-                }
+				if(status[i]) write(pipes[i],cmd,strlen(cmd));
             input = 0;
         }else{
             cmd[i] = 0;
