@@ -1,4 +1,5 @@
-#include<fcntl.h>
+#include <fcntl.h>
+#include <sys/wait.h>
 #include "iStormAPI.h"
 #define INITS 20
 

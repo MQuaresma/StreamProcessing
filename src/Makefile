@@ -1,4 +1,4 @@
-CC=gcc
+CC=gcc -g
 #CFLAGS=
 #LIBS=
 DEP=commands.o controler.o
@@ -29,4 +29,4 @@ spawn: spawn.c
 	$(CC) -o spawn spawn.c
 
 clean: 
-	rm -rf const filter window spawn controler *.o
+	rm -rf const filter window spawn indieStorm supervisor *.o
