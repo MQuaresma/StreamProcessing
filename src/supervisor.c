@@ -6,7 +6,7 @@
 /*
  *
  */
-main(int argc, char *argv[]){
+int main(int argc, char *argv[]){
 
     int fd = open(argv[1], O_RDONLY); //open assigned pipe for communication with the controler
     int nPipeIN[2], nPipeOUT[2];
@@ -60,7 +60,7 @@ main(int argc, char *argv[]){
             wait(NULL);
         }
     }else perror("supervisor: ");
-    
+    return 0;    
 }
 
 

@@ -54,7 +54,7 @@ int newNode(char *args[], int argc, pid_t **nodes, int **pipes, short **status,i
 /*
  * Connects one node's output to the input of certain amount of nodes
  */
-void connect(char **cmd, pid_t *nodes, int *pd, short *status){
+void connect(char **cmd, int *pd, short *status){
 	pid_t dest, src;
 	char *pipeName = (char*)calloc(strlen(*cmd)+3, sizeof(char));
 

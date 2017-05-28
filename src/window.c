@@ -6,7 +6,7 @@ int getMin(int *buf, int v);
 int getMax(int *buf, int v);
 int getSum(int *buf, int v);
 
-main(int argc, char *argv[]){
+int main(int argc, char *argv[]){
     int col, lines, op;
 
     if(--argc < 3){
@@ -21,6 +21,7 @@ main(int argc, char *argv[]){
     op = (argv[2][1]=='v') ^ (argv[2][1]=='i')<<1 ^ (argv[2][1]=='a')<<2 ^ (argv[2][1]=='u')<<3;
    
     getValues(op, lines, col);
+    return 0;
 }
 
 

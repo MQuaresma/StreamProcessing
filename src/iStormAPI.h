@@ -6,7 +6,7 @@
 
 //commands
 int newNode(char *[], int, pid_t **, int **, short **,int);
-void connect(char **, pid_t *, int *, short *);
+void connect(char **, int *, short *);
 void inject(char *[], int *);
 void disconnect(char *[], int *);
 
