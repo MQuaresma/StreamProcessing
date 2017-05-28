@@ -17,17 +17,20 @@ int main(){
     int *pipes = (int*)calloc(INITS, sizeof(int)), len=0;
 	char cmd[PIPE_BUF], **argv;
     int argc, nNodes=INITS, i; 
-    int fd=open("log", O_CREAT);
+    int fd=open("log", O_CREAT, 0777);
 
     while(1){
         for(i = 0; read(0, cmd+i, 1) > 0 && *(cmd+i) != '\n'; input = input || (*(cmd+i) == ':'), i ++);
-        cmd[i] = 0;
         if(input){
-            printf("Input\n");
+            cmd[i+1] = 0;
 			for(i=0; i<nNodes; i++)
-				if(status[i]) write(pipes[i],cmd,strlen(cmd)); 
-            input=0;
+				if(status[i]){ 
+                    fprintf(stderr, "%s", cmd);
+                    write(pipes[i],cmd,strlen(cmd)); 
+                }
+            input = 0;
         }else{
+            cmd[i] = 0;
             argv = processCommand(cmd, &argc);
             if(argc > 1){
                 len = strlen(*argv);
