@@ -28,9 +28,11 @@ int main(int argc, char *argv[]){
             close(nPipeOUT[0]);
             close(fd);
             execN = (char*)calloc(3+strlen(argv[2]), sizeof(char));
-            execN="./";
-            strcat(execN, *(args+2));
-            execvp(execN, args+2);
+            execN[0] = '.';
+            execN[1] = '/';
+            strcat(execN, *args);
+            fprintf(stderr, "%s", execN);
+            execvp(execN, args);
             perror("supervisor: execvp: ");
             _exit(1);
         }else{
@@ -108,8 +110,8 @@ void manOutput(void){
                     default:
                         break;
                 }  
-
             }else fprintf(stderr, "supervisor: manOutput: Invalid command\n"); 
+            buf[0] = 0;
         }else{ 
             if(nOut<=0) write(defIn, buf, i); //output to /dev/null if no input is specified
             else 
