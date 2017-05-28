@@ -21,7 +21,7 @@ int main(int argc, char *argv[]){
             args = (char**)calloc(argc-1, sizeof(void*));
             for(int i = 0; i < argc-1; args[i] = argv[i+2], i ++); //prepare arguments to be passed to execvp
             dup2(nPipeIN[0], 0);
-            dup2(nPipeOUT[1], 1);
+            //dup2(nPipeOUT[1], 1);
             close(nPipeIN[1]);
             close(nPipeIN[0]);
             close(nPipeOUT[1]);
@@ -39,7 +39,6 @@ int main(int argc, char *argv[]){
                 dup2(nPipeIN[1], 1);
                 close(nPipeIN[1]);
                 close(nPipeIN[0]);
-                close(nPipeOUT[1]);
                 close(nPipeOUT[0]);
                 close(fd);
                 manInput(nPipeOUT[1]);
@@ -72,12 +71,12 @@ void manInput(int cmdPipe){
 
     while(1){
         while(read(0,&c,1)>0){
+            buf[i++]=c;
             if(c=='\n'){
-                buf[i++]=c;
                 if(buf[0]==';') write(cmdPipe,buf,i);
                 else write(1,buf,i);
                 i=0;
-            }else buf[i++]=c; 
+            }
         }   
     }    
 }
@@ -100,6 +99,7 @@ void manOutput(void){
                         size *= 1.5;
                         if(idT >= size) pipes=(int*)realloc(pipes, sizeof(int)*size);
                         if((pipes[idT] = open(pipeName, O_WRONLY)) < 0) pipes[idT] = 0;
+                        else nOut++;
                         break;
                     case 'd':
                         close(pipes[idT]);
