@@ -1,5 +1,5 @@
-#include <fcntl.h>
 #include <sys/wait.h>
+#include<fcntl.h>
 #include "iStormAPI.h"
 #define INITS 20
 
@@ -14,13 +14,12 @@ main(int argc, char *argv[]){
     pid_t proc=0;
     
     if(fd > 0){
-        args = (char**)calloc(argc-1, sizeof(void*));
-        for(int i = 0; i < argc-1; args[i] = argv[i+2], i ++); //prepare arguments to be passed to execvp
-    
         pipe(nPipeIN);
         pipe(nPipeOUT);
 
         if(!(proc = fork())){
+            args = (char**)calloc(argc-1, sizeof(void*));
+            for(int i = 0; i < argc-1; args[i] = argv[i+2], i ++); //prepare arguments to be passed to execvp
             dup2(nPipeIN[0], 0);
             dup2(nPipeOUT[1], 1);
             close(nPipeIN[1]);
@@ -59,7 +58,6 @@ main(int argc, char *argv[]){
             close(nPipeOUT[1]);
             close(nPipeOUT[0]);
             close(fd);
-            free(args);
             wait(NULL);
         }
     }else perror("supervisor: ");
@@ -85,8 +83,7 @@ void manInput(int cmdPipe){
 
 void manOutput(void){
 
-    int *pipes = (int*)calloc(INITS, sizeof(int)), i, nOut=0, defIn = open("/dev/null", O_RDONLY), idT, size=INITS;
-    ssize_t r;
+    int *pipes = (int*)calloc(INITS, sizeof(int)), i, nOut=0, defIn = open("log", O_WRONLY), idT, size=INITS;
     char buf[PIPE_BUF], pipeName[10];
 
 
@@ -99,6 +96,8 @@ void manOutput(void){
                 switch(buf[1]){
                     case 'c':
                         getPipeName(buf+2, pipeName);
+                        size *= 1.5;
+                        if(idT >= size) pipes=(int*)realloc(pipes, sizeof(int)*size);
                         if((pipes[idT] = open(pipeName, O_WRONLY)) < 0) pipes[idT] = 0;
                     case 'd':
                         close(pipes[idT]);

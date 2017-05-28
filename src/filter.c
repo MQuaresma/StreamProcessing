@@ -1,7 +1,6 @@
 #include "iStormAPI.h"
 
 int main(int argc, char* argv[]) {
-	char n[10];
 	char c;
 	char line[PIPE_BUF];
 	int a=0;
@@ -16,7 +15,6 @@ int main(int argc, char* argv[]) {
 			char * aux = (char*)malloc(sizeof(char)*a);
 			strcpy(aux,line);
 			int i = 0;
-			int valor; 
 			const char s[2]= ":";
 			char * token;
 			token = strtok(aux,s);

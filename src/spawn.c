@@ -81,7 +81,7 @@ int main (int argc, char *argv[]){
 		}
 		eV=0;
 
-		for(i=0;i<argc-1; i++) free(args[i]);
+		for(i=0;i<argc-1; i++) if(args[i]) free(args[i]);
 		free(args);
 	}
 	return eV;

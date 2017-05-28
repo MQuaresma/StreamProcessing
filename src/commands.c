@@ -11,37 +11,39 @@ int newNode(char *args[], int argc, pid_t **nodes, int **pipes, short **status,i
 	int id, p, f, fd;
 
 	char name[strlen(args[1])+4];
-	name[0]='n';
-	name[1]='o';
-	name[2]='d';
-	name[3]='e';
-	strcat(name,args[1]);
-	f = mkfifo(name, 0666);
+    if(argc > 1){
+        name[0]='n';
+        name[1]='o';
+        name[2]='d';
+        name[3]='e';
+        name[4]=0;
+        strcat(name,args[1]);
+        f=mkfifo(name, 0666);
+        id = atoi(args[1]);
 
-	id = atoi(args[1]);
+        if(f>0){
+            fd = open(name,O_WRONLY);
+            args[0]="supervisor";
+            args[1]=name;
 
-	if(f>0){
-		fd = open(name,O_WRONLY);
-		args[0]="supervisor";
-		args[1]=name;
+            if((p=fork())==0){
+                execvp("./supervisor",args);
+                perror("commands: newNode: execvp: ");
+                _exit(1);
+            }
 
-		if((p=fork())==0){
-			execvp("./supervisor",args);
-			perror("commands: newNode: execvp: ");
-			_exit(1);
-		}
+            if(id>=nds){
+                nds = nds + nds/2;
+                *nodes = (pid_t*)realloc(*nodes,nds);
+                *pipes = (int*)realloc(*pipes,nds);
+                *status = (short*)realloc(*status,nds);
+            }
 
-		if(id>=nds){
-			nds = nds + nds/2;
-			*nodes = (pid_t*)realloc(*nodes,nds);
-			*pipes = (int*)realloc(*pipes,nds);
-			*status = (short*)realloc(*status,nds);
-		}
-
-		(*nodes)[id] = p;
-		(*pipes)[id] = fd;
-        (*pipes)[id] = 1;
-    }else nds=-1;
+            (*nodes)[id] = p;
+            (*pipes)[id] = fd;
+            (*pipes)[id] = 1;
+        }else nds=-1;
+    }else fprintf(stderr, "commands: newNode: Not enough arguments");
 	return nds;
 }
 
@@ -72,7 +74,7 @@ void connect(char **cmd, pid_t *nodes, int *pd, short *status){
  * specified
  */
 void inject(char *args[], int *pipes){
-	int id, pf[2];
+	int id;
     
     id = atoi(args[1]);
 
