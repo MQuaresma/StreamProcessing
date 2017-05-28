@@ -56,22 +56,22 @@ int newNode(char *args[], int argc, pid_t **nodes, int **pipes, int **status,int
  */
 void connect(char **cmd, int *pd, int *status){
 	pid_t dest, src;
-	char *pipeName = (char*)calloc(strlen(*cmd)+3, sizeof(char));
     
     if(*cmd){
     	// commands from the jobTracker are delimited by semi-colons
-        strcat(pipeName, CONNECTIN);
         src = atoi(*cmd);
         while(*++cmd){
+            char *pipeName = (char*)calloc(strlen(*cmd)+4, sizeof(char));
+            strcat(pipeName, CONNECTIN);
             dest = atoi(*cmd);
             status[dest] = 0;
             pipeName[2] = 0;
             strcat(pipeName, *cmd);
             strcat(pipeName, "\n");
             write(pd[src], pipeName, strlen(*cmd)+3);
+            free(pipeName);
         }
     }else fprintf(stderr, "commands: connect: no nodes specified");
-    free(pipeName);
 }
 
 /*

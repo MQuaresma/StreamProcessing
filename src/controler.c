@@ -57,12 +57,12 @@ char **processCommand(char *command, int *noArgs){
 
      for(i = 0, words = 1; *(command+i); words += isspace(*(command+i)), i ++);
 
-     args = (char**)calloc(words, sizeof(char));
+     args = (char**)calloc(words, sizeof(char*));
      *noArgs = i;
 
      i = 0;
      args[i] = strtok(command, " ");
-     while(args[i++]) args[i] = strtok(NULL, " ");
+     while(args[i]) args[++i] = strtok(NULL, " ");
 
      return args;
 }
