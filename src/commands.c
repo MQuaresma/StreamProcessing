@@ -11,7 +11,7 @@ int newNode(char *args[], int argc, pid_t **nodes, int **pipes, short **status,i
 	int id, p, f, fd;
 
 	char name[strlen(args[1])+4];
-    if(argc > 1){
+    if(argc>1){
         name[0]='n';
         name[1]='o';
         name[2]='d';
@@ -22,7 +22,6 @@ int newNode(char *args[], int argc, pid_t **nodes, int **pipes, short **status,i
         id = atoi(args[1]);
 
         if(!f){
-            fd = open(name,O_WRONLY);
             args[0]="supervisor";
             args[1]=name;
             if((p=fork())==0){
@@ -33,14 +32,17 @@ int newNode(char *args[], int argc, pid_t **nodes, int **pipes, short **status,i
 
             if(id>=nds){
                 nds = nds + nds/2;
-                *nodes = (pid_t*)realloc(*nodes,nds);
-                *pipes = (int*)realloc(*pipes,nds);
-                *status = (short*)realloc(*status,nds);
+               *nodes = (pid_t*)realloc(*nodes,nds);
+               *pipes = (int*)realloc(*pipes,nds); 
+               *status = (short*)realloc(*status,nds);
             }
-
-            (*nodes)[id] = p;
-            (*pipes)[id] = fd;
-            (*pipes)[id] = 1;
+                
+            fd = open(name,O_WRONLY);
+            if(fd>0){
+                (*nodes)[id] = p;
+                (*pipes)[id] = fd;
+                (*pipes)[id] = 1;
+            }else perror("newNode: Cannot open file"); 
         }else{
             perror("commands:");
             nds=-1;
@@ -53,18 +55,20 @@ int newNode(char *args[], int argc, pid_t **nodes, int **pipes, short **status,i
  * Connects one node's output to the input of certain amount of nodes
  */
 void connect(char **cmd, pid_t *nodes, int *pd, short *status){
-	pid_t dest;
+	pid_t dest, src;
 	char *pipeName = (char*)calloc(strlen(*cmd)+3, sizeof(char));
 
     if(*cmd){
     	// commands from the jobTracker are delimited by semi-colons
-	    strcat(pipeName, CONNECTIN);
-        strcat(pipeName, *cmd);
-	    strcat(pipeName, "\n");
+        strcat(pipeName, CONNECTIN);
+        src = atoi(*cmd);
         while(*++cmd){
-			dest = atoi(*cmd);
-			status[dest] = 0;
-            write(pd[dest], pipeName, strlen(*cmd)+3);
+            dest = atoi(*cmd);
+            status[dest] = 0;
+            pipeName[2] = 0;
+            strcat(pipeName, *cmd);
+            strcat(pipeName, "\n");
+            write(pd[src], pipeName, strlen(*cmd)+3);
         }
     }else fprintf(stderr, "commands: connect: no nodes specified");
     free(pipeName);

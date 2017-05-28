@@ -20,7 +20,7 @@ main(){
     int fd=open("log", O_CREAT);
 
     while(1){
-        for(i = 0; read(0, cmd+i, 1) > 0 && *(cmd+i) != '\n'; input = (*(cmd+i) == ':'), i ++);
+        for(i = 0; read(0, cmd+i, 1) > 0 && *(cmd+i) != '\n'; input = input || (*(cmd+i) == ':'), i ++);
         cmd[i] = 0;
         if(input){
             printf("Input\n");
@@ -31,12 +31,12 @@ main(){
             if(argc > 1){
                 len = strlen(*argv);
                 if(!strncmp(*argv, "node", (len < 4 ? len : 4))) nNodes = newNode(argv, argc, &nodes, &pipes, &status, nNodes);
-                else if(!strncmp(*argv, "connect", (len < 7 ? len : 7))) connect(argv, nodes, pipes, status);
+                else if(!strncmp(*argv, "connect", (len < 7 ? len : 7))) connect(argv+1, nodes, pipes, status);
                 else if(!strncmp(*argv, "inject", (len < 6 ? len : 6))) inject(argv, pipes);
                 else if(!strncmp(*argv, "disconnect", (len < 10 ? len : 10))) disconnect(argv, pipes);            
                 else if(!strncmp(*argv, "quit", (len < 4 ? len : 4))) exit(0);
-                free(argv);
-            }
+            }    
+            free(argv);
         }
     }
     free(status);

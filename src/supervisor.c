@@ -28,12 +28,11 @@ main(int argc, char *argv[]){
             close(nPipeOUT[0]);
             close(fd);
             execN = (char*)calloc(3+strlen(argv[2]), sizeof(char));
-            strcpy(execN, "./");
+            execN="./";
             strcat(execN, *(args+2));
             execvp(execN, args+2);
             perror("supervisor: execvp: ");
             _exit(1);
-        }else{
             if(!fork()){ 
                 dup2(fd, 0);     
                 dup2(nPipeIN[1], 1);
@@ -100,6 +99,7 @@ void manOutput(void){
                         size *= 1.5;
                         if(idT >= size) pipes=(int*)realloc(pipes, sizeof(int)*size);
                         if((pipes[idT] = open(pipeName, O_WRONLY)) < 0) pipes[idT] = 0;
+                        break;
                     case 'd':
                         close(pipes[idT]);
                         pipes[idT] = 0;
@@ -112,7 +112,7 @@ void manOutput(void){
         }else{ 
             if(nOut<=0) write(defIn, buf, i); //output to /dev/null if no input is specified
             else 
-                for(int j = 0; j < INITS; j ++)
+                for(int j = 0; j < size; j ++)
                     if(pipes[j]) write(pipes[j], buf, i);
         }    
     }
@@ -124,5 +124,6 @@ void getPipeName(char *id, char *buf){
 	buf[1]='o';
 	buf[2]='d';
 	buf[3]='e';
+    buf[4]=0;
 	strcat(buf,id);
 }
