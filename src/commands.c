@@ -7,8 +7,8 @@
 #define CONNECTIN ";c"
 #define DCONNECTIN ";d"
 
-int newNode(char *args[], int argc, pid_t **nodes, int **pipes, statusNodeP **status,int nds){
-	int id, p, f, fd;
+int newNode(char *args[], int argc, pid_t **nodes, int **pipes, statusNodeP **status,int *nds){
+	int id, p, f, fd, ret=0;
 
 	char name[strlen(args[1])+4];
     if(argc>1){
@@ -29,23 +29,29 @@ int newNode(char *args[], int argc, pid_t **nodes, int **pipes, statusNodeP **st
                 perror("commands: newNode: execvp: ");
                 _exit(1);
             }
-            if(id>=nds){
-                nds = nds + nds/2;
-                *nodes = (pid_t*)realloc(*nodes,nds);
-                *pipes = (int*)realloc(*pipes,nds); 
-                *status = (statusNodeP*)realloc(*status,nds);
+            if(id>=*nds){
+                *nds = *nds + *nds/2;
+                *nodes = (pid_t*)realloc(*nodes,*nds);
+                *pipes = (int*)realloc(*pipes,*nds); 
+                *status = (statusNodeP*)realloc(*status,*nds);
             }
             fd = open(name,O_WRONLY);
             if(fd>0){
                 (*nodes)[id] = p;
                 (*pipes)[id] = fd;
-            }else perror("newNode: Cannot open file"); 
+            }else {
+                perror("newNode: Cannot open file");
+                ret=1;
+            }   
         }else{
             perror("commands:");
-            nds=-1;
+            ret=1;
         }
-    }else fprintf(stderr, "commands: newNode: Not enough arguments");
-	return nds;
+    }else {
+        fprintf(stderr, "commands: newNode: Not enough arguments");
+        ret=1;
+    }
+	return ret;
 }
 
 /*
@@ -121,7 +127,17 @@ void disconnect(char *args[], int *pipes, statusNodeP *status){
 
 void removeNode(char *args[], statusNodeP *status, int *pipes, int activeNodes, int nNodes){
     int nd=atoi(args[1]); 
-    int *dest=(int*)calloc(*activeNodes,sizeof(int));
+    statusNodeP aux = NULL;
+    int i;
     
-    free(dest); 
+    for(i=0;i<nNodes && activeNodes;i++){
+        if(i!=nd){
+            if(status[i]) activeNodes--;
+            for(aux=status[i];aux && (aux->nd!=nd); aux=aux->next);
+            if(aux) {
+                for(aux=status[nd]; aux; aux = aux->prox)
+                    connect(,pipes,status);
+            }
+        }   
+    }
 }
