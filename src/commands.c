@@ -51,7 +51,7 @@ int newNode(char *args[], int argc, pid_t **nodes, int **pipes, statusNodeP **st
 /*
  * Connects one node's output to the input of certain amount of nodes
  */
-void connect(char **cmd, int *pd, statusNodeP *status){
+void connect(char **cmd, int *pipes, statusNodeP *status){
 	pid_t dest, src;
     
     if(*cmd){
@@ -68,7 +68,7 @@ void connect(char **cmd, int *pd, statusNodeP *status){
             pipeName[2] = 0;
             strcat(pipeName, *cmd);
             strcat(pipeName, "\n");
-            write(pd[src], pipeName, strlen(*cmd)+3);
+            write(pipes[src], pipeName, strlen(*cmd)+3);
             free(pipeName);
         }
     }else fprintf(stderr, "commands: connect: no nodes specified");
@@ -119,9 +119,9 @@ void disconnect(char *args[], int *pipes, statusNodeP *status){
     free(pipeName);
 }
 
-void removeNode(char *args[], statusNodeP *status, int *pipes, int *activeNodes){
+void removeNode(char *args[], statusNodeP *status, int *pipes, int activeNodes, int nNodes){
     int nd=atoi(args[1]); 
-    int *dest=(int*)calloc(activeNodes,sizeof(int));
+    int *dest=(int*)calloc(*activeNodes,sizeof(int));
     
     free(dest); 
 }

@@ -36,7 +36,10 @@ int main(){
                 else if(!strncmp(*argv, "connect", (len < 7 ? len : 7))) connect(argv+1, pipes, status);
                 else if(!strncmp(*argv, "inject", (len < 6 ? len : 6))) inject(argv, pipes);
                 else if(!strncmp(*argv, "disconnect", (len < 10 ? len : 10))) disconnect(argv, pipes, status);            
-                else if(!strncmp(*argv, "remove", (len < 6 ? len : 6))) removeNode(argv, status, pipes, activeNodes);
+                else if(!strncmp(*argv, "remove", (len < 6 ? len : 6))){
+                    activeNodes--;
+                    removeNode(argv, status, pipes, activeNodes, nNodes);
+                } 
                 else if(!strncmp(*argv, "quit", (len < 4 ? len : 4))) exit(0);
             }    
             free(argv);
