@@ -4,18 +4,18 @@
 #include <string.h>
 #include <stdlib.h>
 
-//commands
-int newNode(char *[], int, pid_t **, int **, int **,int);
-void connect(char **, int *, int *);
-void inject(char *[], int *);
-void disconnect(char *[], int *, int *);
+typedef struct statusNode{
+     int nd;
+     struct statusNode *prox;
+}*statusNodeP;
 
+//commands
+int newNode(char *[], int, pid_t **, int **, statusNodeP **,int);
+void connect(char **, int *, statusNodeP*);
+void inject(char *[], int *);
+void disconnect(char *[], int *, statusNodeP*);
+void myRemove(char *[],statusNodeP*, int *);
 
 void manInput(int);
 void manOutput(void);
 void getPipeName(char *,char *);
-
-typedef struct statusNode{
-    int nd;        
-    struct statusNode *prox;
-}*statusNodeP;

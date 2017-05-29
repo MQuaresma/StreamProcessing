@@ -13,8 +13,8 @@ char **processCommand(char *, int *);
 
 int main(){
     pid_t *nodes = (pid_t*)calloc(INITS, sizeof(pid_t));
-	statusNodeP *status = (statusNodeP*)calloc(INITS, sizeof(statusNodeP)), input=0;
-    int *pipes = (int*)calloc(INITS, sizeof(int)), len=0;
+	statusNodeP *status = (statusNodeP*)calloc(INITS, sizeof(statusNodeP));
+    int *pipes = (int*)calloc(INITS, sizeof(int)), len=0, input=0;;
 	char cmd[PIPE_BUF], **argv;
     int argc, nNodes=INITS, i; 
     int fd=open("log", O_CREAT, 0777);
@@ -35,7 +35,7 @@ int main(){
                 else if(!strncmp(*argv, "connect", (len < 7 ? len : 7))) connect(argv+1, pipes, status);
                 else if(!strncmp(*argv, "inject", (len < 6 ? len : 6))) inject(argv, pipes);
                 else if(!strncmp(*argv, "disconnect", (len < 10 ? len : 10))) disconnect(argv, pipes, status);            
-                else if(!strncmp(*argv, "remove", (len < 6 ? len : 6))) remove(argv, pipes, status);
+                else if(!strncmp(*argv, "remove", (len < 6 ? len : 6))) myRemove(argv, status, pipes);
                 else if(!strncmp(*argv, "quit", (len < 4 ? len : 4))) exit(0);
             }    
             free(argv);

@@ -7,7 +7,7 @@
 #define CONNECTIN ";c"
 #define DCONNECTIN ";d"
 
-int newNode(char *args[], int argc, pid_t **nodes, int **pipes, statusNodeP *status,int nds){
+int newNode(char *args[], int argc, pid_t **nodes, int **pipes, statusNodeP **status,int nds){
 	int id, p, f, fd;
 
 	char name[strlen(args[1])+4];
@@ -51,7 +51,7 @@ int newNode(char *args[], int argc, pid_t **nodes, int **pipes, statusNodeP *sta
 /*
  * Connects one node's output to the input of certain amount of nodes
  */
-void connect(char **cmd, int *pd, statusNodeP status){
+void connect(char **cmd, int *pd, statusNodeP *status){
 	pid_t dest, src;
     
     if(*cmd){
@@ -61,7 +61,10 @@ void connect(char **cmd, int *pd, statusNodeP status){
             char *pipeName = (char*)calloc(strlen(*cmd)+4, sizeof(char));
             strcat(pipeName, CONNECTIN);
             dest = atoi(*cmd);
-            status[dest] = 0;
+            statusNodeP aux = (statusNodeP)malloc(sizeof(struct statusNode));
+            aux->nd=src;
+            aux->prox=status[dest];
+            status[dest] = aux;
             pipeName[2] = 0;
             strcat(pipeName, *cmd);
             strcat(pipeName, "\n");
@@ -92,9 +95,10 @@ void inject(char *args[], int *pipes){
 /*
  * Disconnects two nodes 
  */
-void disconnect(char *args[], int *pipes, statusNodeP status){
-	int id1, id2;
+void disconnect(char *args[], int *pipes, statusNodeP *status){
+	int id1, id2, rem=0;
 	char *pipeName = (char*)calloc(strlen(*args)+3, sizeof(char));
+    statusNodeP aux = NULL, prev=NULL;
 
 	id1 = atoi(args[1]);
 	id2 = atoi(args[2]);
@@ -102,14 +106,20 @@ void disconnect(char *args[], int *pipes, statusNodeP status){
 	pipeName[3] = 0;
 	strcat(pipeName, *(args+2));
 	strcat(pipeName, "\n");
-
-	status[id2] = 1; //change source of id2
+    
+    for(prev=aux=status[id2];!rem && aux; prev=aux, aux=aux->prox){
+        if(aux->nd==id1){
+            prev->prox=aux->prox;
+            free(aux);
+            rem=1;
+        }
+    }
 
 	write(pipes[id1], pipeName, strlen(pipeName)); //remove id2 from the nodes that id1 outputs to
     free(pipeName);
 }
 
-void remove(char *args[], statusNodeP status, int *pipes){
+void myRemove(char *args[], statusNodeP *status, int *pipes){
    int nd = atoi(args[1]); 
 
     
