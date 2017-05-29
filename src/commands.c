@@ -95,7 +95,7 @@ void inject(char *args[], int *pipes){
 /*
  * Disconnects two nodes 
  */
-void disconnect(char *args[], int *pipes){
+void disconnect(char *args[], int *pipes, int *status){
 	int id1, id2;
 	char *pipeName = (char*)calloc(strlen(*args)+3, sizeof(char));
 
@@ -106,7 +106,7 @@ void disconnect(char *args[], int *pipes){
 	strcat(pipeName, *(args+2));
 	strcat(pipeName, "\n");
 
-	pipes[id2] = 0; //change source of id2
+	status[id2] = 1; //change source of id2
 
 	write(pipes[id1], pipeName, strlen(pipeName)); //remove id2 from the nodes that id1 outputs to
     free(pipeName);

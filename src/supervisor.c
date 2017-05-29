@@ -109,6 +109,7 @@ void manOutput(void){
                     case 'd':
                         close(pipes[idT]);
                         pipes[idT] = 0;
+                        nOut --;
                         break;
                     default:
                         break;

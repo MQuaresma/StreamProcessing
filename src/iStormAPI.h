@@ -8,7 +8,7 @@
 int newNode(char *[], int, pid_t **, int **, int **,int);
 void connect(char **, int *, int *);
 void inject(char *[], int *);
-void disconnect(char *[], int *);
+void disconnect(char *[], int *, int *);
 
 
 void manInput(int);
