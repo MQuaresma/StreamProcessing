@@ -114,11 +114,10 @@ void disconnect(char *args[], int *pipes, statusNodeP *status){
 	strcat(pipeName, "\n");
     
     for(aux=status[id2];!rem && aux; prev=aux, aux=aux->prox){
-        if(aux->nd==id1){
-            if(!prev) status[id2]=aux->prox;
+        if((rem=aux->nd==id1)){
+            if(!prev) status[id2] = aux->prox;
             else prev->prox=aux->prox;
             free(aux);
-            rem=1;
         }
     }
 
@@ -126,8 +125,9 @@ void disconnect(char *args[], int *pipes, statusNodeP *status){
     free(pipeName);
 }
 
-void myRemove(char *args[], statusNodeP *status, int *pipes, int *activeNodes){
-    int nd = atoi(args[1]); 
-    
-    
+void removeNode(char *args[], statusNodeP *status, int *pipes, int *activeNodes){
+    int nd=atoi(args[1]); 
+    int *dest=(int*)calloc(activeNodes,sizeof(int));
+  
+    free(dest); 
 }

@@ -10,11 +10,11 @@ typedef struct statusNode{
 }*statusNodeP;
 
 //commands
-int newNode(char *[], int, pid_t **, int **, statusNodeP **,int);
+int newNode(char *[], int, pid_t **, int **, statusNodeP **,int *);
 void connect(char **, int *, statusNodeP*);
 void inject(char *[], int *);
 void disconnect(char *[], int *, statusNodeP*);
-void myRemove(char *[],statusNodeP*, int *);
+void removeNode(char *[],statusNodeP*, int *, int*);
 
 void manInput(int);
 void manOutput(void);
