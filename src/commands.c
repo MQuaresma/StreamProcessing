@@ -126,7 +126,7 @@ void disconnect(char *args[], int *pipes, statusNodeP *status){
     free(pipeName);
 }
 
-void myRemove(char *args[], statusNodeP *status, int *pipes, int activeNodes){
+void myRemove(char *args[], statusNodeP *status, int *pipes, int *activeNodes){
     int nd = atoi(args[1]); 
     
     
