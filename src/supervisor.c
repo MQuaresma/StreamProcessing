@@ -89,7 +89,7 @@ void manInput(int cmdPipe){
 
 void manOutput(void){
 
-    int *pipes = (int*)calloc(INITS, sizeof(int)), i, nOut=0, defIn = open("log", O_WRONLY,0666), idT, size=INITS;
+    int *pipes = (int*)calloc(INITS, sizeof(int)), i, nOut=0, defIn = open("log", O_WRONLY | O_APPEND,0777), idT, size=INITS;
     char buf[PIPE_BUF], pipeName[10];
 
     while(1){
@@ -116,11 +116,12 @@ void manOutput(void){
             }else fprintf(stderr, "supervisor: manOutput: Invalid command\n"); 
             buf[0]=0;
         }else{ 
-            if(nOut<=0) write(defIn, buf, i); //output to /dev/null if no input is specified
+            if(nOut<=0)
+                write(defIn, buf, i+1); //output to /dev/null if no input is specified
             else 
                 for(int j = 0; j < size; j ++)
-                    if(pipes[j]) write(pipes[j], buf, i);
-        }    
+                    if(pipes[j]) write(pipes[j], buf, i+1);
+        }  
     }
 }
 
