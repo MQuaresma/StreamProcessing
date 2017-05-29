@@ -14,3 +14,8 @@ void disconnect(char *[], int *, int *);
 void manInput(int);
 void manOutput(void);
 void getPipeName(char *,char *);
+
+typedef struct statusNode{
+    int nd;        
+    struct statusNode *prox;
+}*statusNodeP;

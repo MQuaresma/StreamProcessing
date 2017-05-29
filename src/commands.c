@@ -7,7 +7,7 @@
 #define CONNECTIN ";c"
 #define DCONNECTIN ";d"
 
-int newNode(char *args[], int argc, pid_t **nodes, int **pipes, int **status,int nds){
+int newNode(char *args[], int argc, pid_t **nodes, int **pipes, statusNodeP *status,int nds){
 	int id, p, f, fd;
 
 	char name[strlen(args[1])+4];
@@ -29,19 +29,16 @@ int newNode(char *args[], int argc, pid_t **nodes, int **pipes, int **status,int
                 perror("commands: newNode: execvp: ");
                 _exit(1);
             }
-
             if(id>=nds){
                 nds = nds + nds/2;
-               *nodes = (pid_t*)realloc(*nodes,nds);
-               *pipes = (int*)realloc(*pipes,nds); 
-               *status = (int*)realloc(*status,nds);
+                *nodes = (pid_t*)realloc(*nodes,nds);
+                *pipes = (int*)realloc(*pipes,nds); 
+                *status = (statusNodeP*)realloc(*status,nds);
             }
-                
             fd = open(name,O_WRONLY);
             if(fd>0){
                 (*nodes)[id] = p;
                 (*pipes)[id] = fd;
-                (*status)[id] = 1;
             }else perror("newNode: Cannot open file"); 
         }else{
             perror("commands:");
@@ -54,7 +51,7 @@ int newNode(char *args[], int argc, pid_t **nodes, int **pipes, int **status,int
 /*
  * Connects one node's output to the input of certain amount of nodes
  */
-void connect(char **cmd, int *pd, int *status){
+void connect(char **cmd, int *pd, statusNodeP status){
 	pid_t dest, src;
     
     if(*cmd){
@@ -95,7 +92,7 @@ void inject(char *args[], int *pipes){
 /*
  * Disconnects two nodes 
  */
-void disconnect(char *args[], int *pipes, int *status){
+void disconnect(char *args[], int *pipes, statusNodeP status){
 	int id1, id2;
 	char *pipeName = (char*)calloc(strlen(*args)+3, sizeof(char));
 
@@ -110,4 +107,11 @@ void disconnect(char *args[], int *pipes, int *status){
 
 	write(pipes[id1], pipeName, strlen(pipeName)); //remove id2 from the nodes that id1 outputs to
     free(pipeName);
+}
+
+void remove(char *args[], statusNodeP status, int *pipes){
+   int nd = atoi(args[1]); 
+
+    
+
 }
