@@ -126,22 +126,25 @@ void disconnect(char *args[], int *pipes, statusNodeP *status){
 }
 
 void removeNode(char *args[], statusNodeP *status, int *pipes, int activeNodes, int nNodes){
+    statusNodeP aux=NULL;
     int nd=atoi(args[1]); 
-    char args[3][5];
-    args[2]=NULL;
+    char **argv=(char**)calloc(3, sizeof(char*)), id1[5], id2[5];
+    *argv = id1;
+    *(argv+1) = id2;
     int i;
     
     for(i=0;i<nNodes && activeNodes;i++){
         if(i!=nd){
             if(status[i]) activeNodes--;
-            for(aux=status[i];aux && (aux->nd!=nd); aux=aux->next);
-            if(aux) {
+            for(aux=status[i];aux && (aux->nd!=nd); aux=aux->prox);
+            if(aux){
+                sprintf(id1,"%d",i);
                 for(aux=status[nd]; aux; aux = aux->prox){
-                    sprintf(args[0],"%d",aux->nd);
-                    sprintf(args[1],"%d",i);
-                    connect(args,pipes,status);
+                    sprintf(id2,"%d",aux->nd);
+                    connect(argv,pipes,status);
                 }   
             }
         }   
     }
+    free(argv);
 }

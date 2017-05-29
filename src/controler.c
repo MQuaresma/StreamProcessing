@@ -31,8 +31,7 @@ int main(){
             argv = processCommand(cmd, &argc);
             if(argc > 1){
                 len = strlen(*argv);
-                if(!strncmp(*argv, "node", (len < 4 ? len : 4))) 
-                    if(!newNode(argv, argc, &nodes, &pipes, &status, &nNodes)) activeNodes ++;
+                if(!strncmp(*argv, "node", (len < 4 ? len : 4)) && !newNode(argv, argc, &nodes, &pipes, &status, &nNodes)) activeNodes ++;
                 else if(!strncmp(*argv, "connect", (len < 7 ? len : 7))) connect(argv+1, pipes, status);
                 else if(!strncmp(*argv, "inject", (len < 6 ? len : 6))) inject(argv, pipes);
                 else if(!strncmp(*argv, "disconnect", (len < 10 ? len : 10))) disconnect(argv, pipes, status);            
