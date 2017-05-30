@@ -1,0 +1,192 @@
+\documentclass[12pt]{article} 
+
+\usepackage{geometry} 
+\geometry{a4paper} 
+\usepackage{graphicx} 
+\usepackage{float} 
+\usepackage{wrapfig} 
+\linespread{1.2}
+\graphicspath{{Pictures/}} 
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[portuguese]{babel}
+
+\begin{document}
+
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+\begin{titlepage}
+
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}} 
+\center
+\begin{figure}[ht!]
+	\centering
+	\includegraphics[scale=3]{DI.png}
+\end{figure}
+
+\textsc{\large Sistemas Operativos}\\[0.5cm] 
+\HRule \\[0.4cm]
+{ \huge \bfseries Stream Processing}\\[0.4cm] 
+\HRule \\[1.5cm]
+
+
+\begin{center} \large
+\emph{Grupo 19:}\\
+José Martins - a\\
+Madalena Castro - a71417\\
+Miguel Quaresma - a\\
+\end{center}
+
+\begin{minipage}{0.4\textwidth}
+\end{minipage}\\[4cm]
+
+{\large \today}\\[3cm] 
+\vfill
+\end{titlepage}
+
+%----------------------------------------------------------------------------------------
+%	TABLE OF CONTENTS
+%----------------------------------------------------------------------------------------
+
+\tableofcontents 
+
+\newpage
+
+%----------------------------------------------------------------------------------------
+%	INTRODUÇÃO
+%----------------------------------------------------------------------------------------
+
+\section{Introdução}
+iiiiiii
+
+
+
+
+\newpage
+
+%----------------------------------------------------------------------------------------
+%	DESENVOLVIMENTO
+%----------------------------------------------------------------------------------------
+
+\section{Desenvolvimento} 
+
+\subsection{Estrutura}
+\subsubsection{Makefile}
+A makefile compila os ficheiros responsáveis pelas componentes (\texttt{const},  \texttt{filter}, \texttt{window}, \texttt{spawn}) e os ficheiros responsáveis pelo controlador (\texttt{controler}, \texttt{commands}, \texttt{supervisor}), utilizando as flags \texttt{g} e \texttt{Wall}. Também é responsável pela eliminação de todos os ficheiros objeto criados e respondentes executáveis criados durante a compilação.
+
+\subsubsection{iStormAPI.h}
+Este ficheiro contém a \texttt{API} principal deste projeto, ou seja, inclui tanto todas as funções partilhadas por vários programas como  a declaração de uma variável global \texttt{statusNode}, sendo esta uma lista de inteiros com os estados dos nós da rede.
+
+
+\subsection{Componentes} 
+\begin{description} 
+\item[Const] \hfill \\
+O programa \textit{const} reproduz as linhas recebidas acrescentando uma nova coluna sempre com o mesmo valor. Para isso, iremos ler caractér a caractér recebido pelo \textit{stdin} e após verificar que estámos no término de uma linha ('\textbackslash n'), adicionámos uma nova coluna a esta com o valor dado como argumento. Posteriormente, concluímos a linha com '\textbackslash n', e reproduzimo-la no \textit{stdout}, realizando esta operação para todas as linhas recebidas. 
+
+\item[Filter] \hfill \\
+O programa \textit{filter} reproduz as linhas que satisfazem uma condição indicada nos argumentos. Inicialmente começamos por dividir a linha recebida pelo \textit{stdin} consoante o \textit{token} ':', e posteriormente verificámos os argumentos recebidos e fomos às colunas respetivas verificar a condição recebida, caso esta fosse verificada,a linha seria reproduzida no \textit{stdout}.
+
+\item[Window] \hfill \\
+O programa \textit{window} reproduz todas as linhas acrescentando-lhe uma nova coluna com o resultado de uma operação calculada sobre valores da coluna indicada nas linhas anteriores. Inicialmente começamos por verificar os argumentos recebidos, guardando a coluna, a operação e quais as linhas anteriores a serem calculadas. De seguida, começámos a leitura das linhas recebidas pelo \textit{stdin} e à medida que uma linha termina é reproduzido no \textit{stdout} a linha com a coluna que representa o cálculo da operação, previamente calculada consoante o tipo de operação, ou seja, inicialmente, como não há linhas anteriores a nova coluna será zero, mas consoante o avanço das linhas será recalculado o valor da nova coluna e guardado numa variável que será posteriormente utilizada para criar a nova coluna. Consoante o tipo de operação enviada como argumento, criámos diferentes funções.
+
+\item[Spawn] \hfill \\
+O programa \textit{spawn} reproduz todas as linhas, executando o comando indicado uma vez para cada uma delas, e acrescentando uma nova coluna com o respectivo \textit{exit status}. 
+
+\end{description} 
+
+
+\subsection{Controlador}
+O controlador é um programa que permite definir uma rede de processamento de \textit{streams}, com cada nó a executar um dos componentes de transformação previamente feitos, recebendo comandos, um por linha. 
+
+\subsubsection{controler}
+O ficheiro \texttt{controler.c} é o programa principal, sendo o responsável pelo \textit{parser} dos eventos recebidos pelo \textit{stdin} e posteriormente a exucação dos comandos recebidos por este.
+\\Este programa começa por ler os eventos do \textit{stdin}, e após a passagem pela função \texttt{processCommand}, função que divide uma linha pelos parâmetro individuais consoante o \textit{token} ' ', executa o comando conforme o primeiro parâmetro recebido, ou seja, caso receba como primeiro parâmetro:
+\begin{itemize}
+\item \texttt{node}: o \texttt{controler} executa a função \texttt{newNode} responsável pela criação de um novo nó.
+\item \texttt{connect}: o \texttt{controler} executa a função \texttt{connect} responsável pela conexão entre nós
+\item \texttt{inject}: o \texttt{controler} executa a função \texttt{inject} que permite a injeção da entrada de um nó a saída produzida por um outro comando.
+\item \texttt{disconnect}: o \texttt{controler} executa a função \texttt{disconnect} que defaz a ligação entre dois nós.
+\item \texttt{remove}: o \texttt{controler} executa a função \texttt{remove} que remove um nó da rede.
+\end{itemize}
+EXPLICAR VARIAVEIS CRIADAS AQUI...
+
+\subsubsection{commands}
+O ficheiro \texttt{commands.c} contém as funções necessárias para realizar os comandos que o controlador deve aceitar, sendo esses os seguintes:
+
+\begin{description} 
+\item[newNode] \hfill \\
+Função que realiza o comando \texttt{node <id> <cmd> <args...>}, que permite definir um nó de rede de processamento, com o indentificador  \texttt{id}, que irá executar o componente \texttt{cmd} com a lista de argumentos \texttt{[args]}. 
+\\Esta função recebe como argumentos um \textit{array} de argumentos dada pelo \textit{stdin} e o número total destes, um \textit{array} com o \texttt{ID} de todos os nós da rede, um \textit{array} de inteiros com os pipes, a lista ligada com os estados dos nós e um inteiro correspondente ao número de nós.
+\\......
+
+\item[connect] \hfill \\
+Função que realiza o comando \texttt{connect <id> <ids...>}, que permite definir ligações entre nós, ou seja, especifica que a saída do componente a correr no nó \texttt{id} deverá ser enviada para cada um dos nós da lista \texttt{[ids]}. 
+\\Esta função recebe como argumentos um \textit{array} com o \texttt{id} e os \texttt{[ids]} a conectar, um \textit{array} de inteiros com os pipes e a lista ligada com os estados dos nós.
+\\..... 
+
+\item[inject] \hfill \\
+Função que realiza o comando \texttt{inject <id> <cmd> <args...>}, que permite injetar na entrada do nó \texttt{id} a saída produzida pelo comando cmd executado com a lista de argumentos \texttt{[args]}. 
+\\Esta função recebe como argumentos um \textit{array} de argumentos dada pelo \textit{stdin} e  um \textit{array} de inteiros com os pipes.
+\\.......
+
+\item[disconnect] \hfill \\
+Função que realiza o comando \texttt{disconnect <id1> <id2>}, que permite desfazer a ligação entre o nó \texttt{id1} e o nó \texttt{id2}. 
+\\Esta função recebe como argumentos um \textit{array} de argumentos dada pelo \textit{stdin}, um \textit{array} de inteiros com os pipes, e a lista ligada com os estados dos nós.
+\\......
+
+\item[removeNode] \hfill \\
+Função que realiza o comando \texttt{remove <id>}, que permite a remoção de um nó na rede. 
+\\Esta função recebe como argumento um \textit{array} de argumentos dada pelo \textit{stdin}, a lista ligada com os estados dos nós, um \textit{array} de inteiros com os pipes, um inteiro correspondente ao número de nós ativos, e um inteiro correspondente ao número de nós.
+\\...... 
+\end{description}
+
+\subsubsection{supervisor}
+
+
+\subsection{Funcionalidades básicas}
+\begin{description} 
+
+\item[Permanência de uma rede] \hfill \\
+Os nós de uma rede, depois de criados, continuam a existir até serem explicitamente removidos. Esta deve ficar recetiva a processar \textit{streams} de eventos que parem e recomecem mais tarde.
+
+\item[Concorrência nas escritas no mesmo nó] \hfill \\
+Ao especificar uma rede, vários nós podem ser ligados a um mesmo nó, ou várias instâncias do comando \texttt{inject}, com outras ainda a decorrer. Como tal, o sistema deve garantir que cada evento chega corretamente ao destino, não corrompido, havendo apenas intercalamento de eventos de diferentes origens.
+
+\item[Nós sem saída definida] \hfill \\
+Os nós cuja saída não esteja ligada a nenhum outro devem ter a sua saída descartada.
+
+\item[Especificação incremental na rede] \hfill \\
+O servidor vai recebenco comandos, devendo atuar perante cada um, atualizando a rede, independentemente de comandos futuros.
+
+\end{description}
+
+\subsection{Funcionalidades adicionais}
+
+\begin{description} 
+\item[Casos de teste] \hfill \\
+rrrrr
+
+\item[Alteração de componentes] \hfill \\
+aaaa
+
+\item[Remoção de nós] \hfill \\
+ggg
+
+
+\end{description}
+
+\newpage
+%----------------------------------------------------------------------------------------
+%	CONCLUSÃO
+%----------------------------------------------------------------------------------------
+
+\section{Conclusão} 
+
+ESCREVER CONCLUSAO! 
+
+
+%----------------------------------------------------------------------------------------
+
+\end{document}
