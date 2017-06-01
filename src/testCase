@@ -1,0 +1,11 @@
+node 1 grep -w int filter.c
+node 2 grep -w int const.c
+node 3 grep -w int spawn.c
+node 4 grep -w int window.c
+node 5 grep -w int commands.c
+node 6 tee result.txt
+connect 1 6
+connect 2 6
+connect 3 6
+connect 4 6
+connect 5 6
