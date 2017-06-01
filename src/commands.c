@@ -64,14 +64,14 @@ void connect(char **cmd, int *pipes, statusNodeP *status){
     	// commands from the jobTracker are delimited by semi-colons
         src = atoi(*cmd);
         while(*++cmd){
-            char *pipeName = (char*)calloc(strlen(*cmd)+4, sizeof(char));
+            char *pipeName=(char*)calloc(strlen(*cmd)+4, sizeof(char));
             strcat(pipeName, CONNECTIN);
             dest = atoi(*cmd);
-            statusNodeP aux = (statusNodeP)malloc(sizeof(struct statusNode));
+            statusNodeP aux=(statusNodeP)malloc(sizeof(struct statusNode));
             aux->nd=src;
             aux->prox=status[dest];
             status[dest] = aux;
-            pipeName[2] = 0;
+            pipeName[2]=0;
             strcat(pipeName, *cmd);
             strcat(pipeName, "\n");
             write(pipes[src], pipeName, strlen(*cmd)+3);
@@ -102,35 +102,33 @@ void inject(char *args[], int *pipes){
  * Disconnects two nodes 
  */
 void disconnect(char *args[], int *pipes, statusNodeP *status){
-	int id1, id2, rem=0;
-	char *pipeName = (char*)calloc(strlen(*args)+3, sizeof(char));
+	int id1, id2;
+	char *pipeName = (char*)calloc(strlen(*(args+1))+4, sizeof(char));
     statusNodeP aux = NULL, prev=NULL;
 
-	id1 = atoi(args[1]);
-	id2 = atoi(args[2]);
+	id1 = atoi(args[0]);
+	id2 = atoi(args[1]);
 	strcat(pipeName, DCONNECTIN);
-	pipeName[3] = 0;
-	strcat(pipeName, *(args+2));
+	strcat(pipeName, *(args+1));
 	strcat(pipeName, "\n");
     
-    for(aux=status[id2];!rem && aux; prev=aux, aux=aux->prox){
-        if((rem=aux->nd==id1)){
-            if(!prev) status[id2] = aux->prox;
-            else prev->prox=aux->prox;
-            free(aux);
-        }
+    for(aux=status[id2];aux && aux->nd!=id1; prev=aux, aux=aux->prox);
+
+    if(aux){
+        if(!prev) status[id2] = aux->prox;
+        else prev->prox=aux->prox;
+        free(aux);
+	    write(pipes[id1], pipeName, strlen(pipeName)); //remove id2 from the nodes that id1 outputs to
     }
 
-	write(pipes[id1], pipeName, strlen(pipeName)); //remove id2 from the nodes that id1 outputs to
     free(pipeName);
 }
 
-void removeNode(char *args[], statusNodeP *status, int *pipes, int activeNodes, int nNodes){
+void removeNode(char *args[], statusNodeP *status, pid_t *nodes, int *pipes, int activeNodes, int nNodes){
     statusNodeP aux=NULL;
     int nd=atoi(args[1]); 
     char **argv=(char**)calloc(3, sizeof(char*)), id1[5], id2[5];
-    *argv = id1;
-    *(argv+1) = id2;
+    *(argv+1)=id2;
     int i;
     
     for(i=0;i<nNodes && activeNodes;i++){
@@ -138,13 +136,24 @@ void removeNode(char *args[], statusNodeP *status, int *pipes, int activeNodes, 
             if(status[i]) activeNodes--;
             for(aux=status[i];aux && (aux->nd!=nd); aux=aux->prox);
             if(aux){
-                sprintf(id1,"%d",i);
+                *argv=args[1];
+                sprintf(id2,"%d",i);
+                disconnect(argv, pipes, status);
+                *argv=id1;
                 for(aux=status[nd]; aux; aux = aux->prox){
-                    sprintf(id2,"%d",aux->nd);
+                    sprintf(id1,"%d",aux->nd);
                     connect(argv,pipes,status);
                 }   
             }
         }   
     }
+        
+    *(argv+1)=args[1];
+    for(aux=status[nd]; aux; aux=status[nd]){
+        sprintf(id1,"%d",aux->nd);
+        disconnect(argv, pipes, status);
+    }
+    nodes[nd]=0;
+     
     free(argv);
 }

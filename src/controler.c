@@ -22,9 +22,8 @@ int main(){
     while(1){
         for(i = 0; read(0, cmd+i, 1) > 0 && *(cmd+i) != '\n'; input = input || (*(cmd+i) == ':'), i ++);
         if(input){
-            cmd[i+1] = 0;
-			for(i=0; i<nNodes; i++)
-				if(!status[i] && nodes[i]) write(pipes[i],cmd,strlen(cmd));
+			for(int j=0; j<nNodes; j++)
+				if(!status[j] && nodes[j]) write(pipes[j],cmd,i+1);
             input = 0;
         }else{
             cmd[i] = 0;
@@ -32,12 +31,12 @@ int main(){
             if(argc > 1){
                 len = strlen(*argv);
                 if(!strncmp(*argv, "node", (len < 4 ? len : 4)) && !newNode(argv, argc, &nodes, &pipes, &status, &nNodes)) activeNodes ++;
+                else if(!strncmp(*argv, "disconnect", (len < 10 ? len : 10))) disconnect(argv+1, pipes, status);            
                 else if(!strncmp(*argv, "connect", (len < 7 ? len : 7))) connect(argv+1, pipes, status);
                 else if(!strncmp(*argv, "inject", (len < 6 ? len : 6))) inject(argv, pipes);
-                else if(!strncmp(*argv, "disconnect", (len < 10 ? len : 10))) disconnect(argv, pipes, status);            
                 else if(!strncmp(*argv, "remove", (len < 6 ? len : 6))){
                     activeNodes--;
-                    removeNode(argv, status, pipes, activeNodes, nNodes);
+                    removeNode(argv, status, nodes, pipes, activeNodes, nNodes);
                 } 
                 else if(!strncmp(*argv, "quit", (len < 4 ? len : 4))) exit(0);
             }    

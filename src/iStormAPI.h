@@ -14,7 +14,7 @@ int newNode(char *[], int, pid_t **, int **, statusNodeP **,int *);
 void connect(char **, int *, statusNodeP*);
 void inject(char *[], int *);
 void disconnect(char *[], int *, statusNodeP*);
-void removeNode(char *[],statusNodeP*, int *, int, int);
+void removeNode(char *[],statusNodeP*, pid_t *, int *, int, int);
 
 void manInput(int);
 void manOutput(void);

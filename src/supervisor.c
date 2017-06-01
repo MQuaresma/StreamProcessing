@@ -78,6 +78,7 @@ void manInput(int cmdPipe){
         while(read(0,&c,1)>0){
             buf[i++]=c;
             if(c=='\n'){
+                buf[i]=0;
                 if(buf[0]==';') write(cmdPipe,buf,i);
                 else write(1,buf,i);
                 i=0;
@@ -88,7 +89,6 @@ void manInput(int cmdPipe){
 
 
 void manOutput(void){
-
     int *pipes = (int*)calloc(INITS, sizeof(int)), i, nOut=0, defIn = open("log", O_WRONLY | O_APPEND,0777), idT, size=INITS;
     char buf[PIPE_BUF], pipeName[10];
 
