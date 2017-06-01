@@ -8,6 +8,9 @@
 #define CONNECTIN ";c"
 #define DCONNECTIN ";d"
 
+/*
+ * Create a node
+ */
 int newNode(char *args[], int argc, pid_t **nodes, int **pipes, statusNodeP **status,int *nds){
 	int id, p, f, fd, ret=0;
 
@@ -125,6 +128,9 @@ void disconnect(char *args[], int *pipes, statusNodeP *status){
     free(pipeName);
 }
 
+/*
+ *remove a node
+ */
 void removeNode(char *args[], statusNodeP *status, pid_t *nodes, int *pipes, int activeNodes, int nNodes){
     char **argv=(char**)calloc(3, sizeof(char*)), id1[5], id2[5];
     statusNodeP aux=NULL;
@@ -149,11 +155,23 @@ void removeNode(char *args[], statusNodeP *status, pid_t *nodes, int *pipes, int
         }   
         
     *(argv+1)=args[1];
+
     for(aux=status[nd]; aux; aux=status[nd]){
         sprintf(id1,"%d",aux->nd);
         disconnect(argv, pipes, status);
     }
+    
     close(pipes[nd]);
+
+    char pipeName[strlen(args[1])+4];
+    pipeName[0]='n';
+    pipeName[1]='o';
+    pipeName[2]='d';
+    pipeName[3]='e';
+    pipeName[4]=0;
+    strcat(pipeName,args[1]);
+    remove(pipeName);
+
     kill(SIGUSR1, nodes[nd]);
     nodes[nd]=0;
      

@@ -1,11 +1,13 @@
 #include<fcntl.h>
 #include<sys/stat.h>
+#include<sys/wait.h>
 #include<signal.h>
 #include<ctype.h>
 #include "iStormAPI.h"
 #define INITS 20
 
 char **processCommand(char *, int *);
+void clean();
 
 /*
 * Controller which reads lines from stdin, parses them and send the result to the job handler for
@@ -41,10 +43,7 @@ int main(){
                     activeNodes--;
                     removeNode(argv, status, nodes, pipes, activeNodes, nNodes);
                 } 
-                else if(!strncmp(*argv, "quit", (len < 4 ? len : 4))){ 
-                    execlp("pkill", "pkill", "supervisor", NULL);
-                    exit(0);
-                }    
+                else if(!strncmp(*argv, "quit", (len < 4 ? len : 4))) clean();
             }    
             free(argv);
         }
@@ -52,6 +51,24 @@ int main(){
     free(status);
     free(nodes);
     return 0;
+}
+
+//kill all childs and clean files no longer needed
+void clean(){
+    
+    if(fork()==0){
+        execlp("pkill", "pkill", "supervisor", NULL);
+        perror("Cannot kill childs");
+        exit(0);
+    }
+    wait(NULL);
+    if(fork()==0){
+        execl("/bin/sh", "sh", "-c", "rm node* input", NULL);
+        perror("Cannot delete files");
+        exit(0);
+    }
+    wait(NULL);
+    exit(0);
 }
 
 /*
