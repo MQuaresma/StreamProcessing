@@ -1,4 +1,5 @@
 #include<fcntl.h>
+#include<sys/stat.h>
 #include<signal.h>
 #include<ctype.h>
 #include "iStormAPI.h"
@@ -15,9 +16,11 @@ int main(){
     pid_t *nodes = (pid_t*)calloc(INITS, sizeof(pid_t));
 	statusNodeP *status = (statusNodeP*)calloc(INITS, sizeof(statusNodeP));
     int *pipes = (int*)calloc(INITS, sizeof(int)), len=0, input=0;;
+    int argc, nNodes=INITS, i, activeNodes=0, fd=open("log", O_CREAT, 0777), inPipe;
 	char cmd[PIPE_BUF], **argv;
-    int argc, nNodes=INITS, i, activeNodes=0; 
-    int fd=open("log", O_CREAT, 0777);
+
+    if(!mkfifo("input", 0666) && (inPipe=open("input", O_RDONLY)) > 0) dup2(inPipe, 0);
+    else perror("");
 
     while(1){
         for(i = 0; read(0, cmd+i, 1) > 0 && *(cmd+i) != '\n'; input = input || (*(cmd+i) == ':'), i ++);
@@ -38,7 +41,10 @@ int main(){
                     activeNodes--;
                     removeNode(argv, status, nodes, pipes, activeNodes, nNodes);
                 } 
-                else if(!strncmp(*argv, "quit", (len < 4 ? len : 4))) exit(0);
+                else if(!strncmp(*argv, "quit", (len < 4 ? len : 4))){ 
+                    execlp("pkill", "pkill", "supervisor", NULL);
+                    exit(0);
+                }    
             }    
             free(argv);
         }

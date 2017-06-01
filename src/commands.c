@@ -126,13 +126,13 @@ void disconnect(char *args[], int *pipes, statusNodeP *status){
 }
 
 void removeNode(char *args[], statusNodeP *status, pid_t *nodes, int *pipes, int activeNodes, int nNodes){
-    statusNodeP aux=NULL;
-    int nd=atoi(args[1]); 
     char **argv=(char**)calloc(3, sizeof(char*)), id1[5], id2[5];
+    statusNodeP aux=NULL;
+    int nd=atoi(args[1]), i; 
+
     *(argv+1)=id2;
-    int i;
     
-    for(i=0;i<nNodes && activeNodes;i++){
+    for(i=0;i<nNodes && activeNodes;i++)
         if(i!=nd){
             if(status[i]) activeNodes--;
             for(aux=status[i];aux && (aux->nd!=nd); aux=aux->prox);
@@ -147,7 +147,6 @@ void removeNode(char *args[], statusNodeP *status, pid_t *nodes, int *pipes, int
                 }   
             }
         }   
-    }
         
     *(argv+1)=args[1];
     for(aux=status[nd]; aux; aux=status[nd]){
