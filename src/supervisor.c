@@ -1,7 +1,12 @@
 #include <sys/wait.h>
 #include<fcntl.h>
+#include<signal.h>
 #include "iStormAPI.h"
 #define INITS 20
+
+void dummyAction(int sig){
+    if(sig != SIGUSR1) pause();
+};
 
 /*
  *
@@ -11,7 +16,8 @@ int main(int argc, char *argv[]){
     int fd = open(argv[1], O_RDONLY); //open assigned pipe for communication with the controler
     int nPipeIN[2], nPipeOUT[2];
     char **args=NULL, *execN=NULL;
-    pid_t proc=0;
+    pid_t proc=0, inC=0, outC=0;
+    signal(SIGUSR1,(void (*)(int))dummyAction);
 
     if(fd > 0){
         pipe(nPipeIN);
@@ -39,7 +45,7 @@ int main(int argc, char *argv[]){
             perror("supervisor: execvp: ");
             _exit(1);
         }else{
-            if(!fork()){ 
+            if(!(inC=fork())){ 
                 dup2(fd, 0);     
                 dup2(nPipeIN[1], 1);
                 close(nPipeIN[1]);
@@ -48,7 +54,7 @@ int main(int argc, char *argv[]){
                 close(fd);
                 manInput(nPipeOUT[1]);
             }
-            if(!fork()){
+            if(!(outC=fork())){
                 dup2(nPipeOUT[0], 0); 
                 close(nPipeIN[1]);
                 close(nPipeIN[0]);
@@ -62,7 +68,11 @@ int main(int argc, char *argv[]){
             close(nPipeOUT[1]);
             close(nPipeOUT[0]);
             close(fd);
-            wait(NULL);
+            pause();
+            kill(SIGINT, inC);
+            kill(SIGINT, outC);
+            kill(SIGINT, proc);
+            remove(argv[1]);
         }
     }else perror("supervisor: ");
     return 0;    

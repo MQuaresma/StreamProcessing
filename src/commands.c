@@ -3,6 +3,7 @@
 #include <sys/types.h> 
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <signal.h>
 #include "iStormAPI.h"
 #define CONNECTIN ";c"
 #define DCONNECTIN ";d"
@@ -153,6 +154,8 @@ void removeNode(char *args[], statusNodeP *status, pid_t *nodes, int *pipes, int
         sprintf(id1,"%d",aux->nd);
         disconnect(argv, pipes, status);
     }
+    close(pipes[nd]);
+    kill(SIGUSR1, nodes[nd]);
     nodes[nd]=0;
      
     free(argv);
