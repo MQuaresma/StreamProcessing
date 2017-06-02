@@ -135,6 +135,7 @@ void removeNode(char *args[], statusNodeP *status, pid_t *nodes, int *pipes, int
     char **argv=(char**)calloc(3, sizeof(char*)), id1[5], id2[5];
     statusNodeP aux=NULL;
     int nd=atoi(args[1]), i; 
+    sleep(1);
 
     *(argv+1)=id2;
     

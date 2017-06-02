@@ -44,7 +44,8 @@ int main(){
                     removeNode(argv, status, nodes, pipes, activeNodes, nNodes);
                 } 
                 else if(!strncmp(*argv, "quit", (len < 4 ? len : 4))){
-                    execlp("pkill","supervisor",NULL);
+                    close(fd);
+                    execlp("pkill","pkill", "supervisor",NULL);
                     exit(0);
                 }
             }
