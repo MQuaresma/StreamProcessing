@@ -59,7 +59,7 @@ Miguel Quaresma - a77049\\
 %----------------------------------------------------------------------------------------
 
 \section{Introdução}
-\texit{Stream Processing} é uma arquitetura computacional que tem como intuito facilitar o uso de paralelismo no processamento de dados ao abstrair o utilizador da gestão dos recursos disponíveis (i.e: comunicação entre nodos, uso de recursos,etc). Os dados são recebidos sob a forma de streams e operações que são aplicadas a cada elemento da stream. 
+\textit{Stream Processing} é uma arquitetura computacional que tem como intuito facilitar o uso de paralelismo no processamento de dados ao abstrair o utilizador da gestão dos recursos disponíveis (i.e: comunicação entre nodos, uso de recursos,etc). Os dados são recebidos sob a forma de streams e operações que são aplicadas a cada elemento da stream. 
 
 A linguagem de programação C disponibiliza um conjunto de chamadas ao sistema que permitem a exploração de paralelismo simples, sendo o intuito deste trabalho recorrer a estas mesmas chamadas para implementar um sistema similar ao referido.
 
@@ -73,8 +73,13 @@ A linguagem de programação C disponibiliza um conjunto de chamadas ao sistema 
 \section{Desenvolvimento} 
 
 \subsection{Estrutura}
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=120mm]{graph.jpg}
+\caption{}
+\end{figure}
 
-\subsection{Controlador}
+\subsubsection{Controlador}
 O controlador é a entidade responsável por processar input e gerir a rede de processamento, nomeadamente através da criação/remoção de nodos e gestão das ligações entre os mesmos.
 A gestão dos nodos recorre a três arrays para manter informação relativa às ligações entre os nodos, ao pid(process id) dos mesmos e aos descriptores dos nnamed pipes que servem de input para os nodos.
 A leitura do input é feita linha a linha através de um named pipe com o nome \textit{input}, de seguida o input é classificado como instruções ou dados através da presença(ou ausência) do caracter ':'.
@@ -88,12 +93,14 @@ Os comandos disponíveis são os seguintes:
 \end{itemize}
 Determinados comandos exigem ações por parte dos nodos e, por forma a que estes sejam diferentes dos dados enviados para os mesmos(nodos) é usado como prefixo o caracter ';' seguido de um caracter que identifique o comando a executar ('c' para \textit{connect} e 'd' para \textit{disconnect}).
 
-\begin{figure}[ht!]
-     \centering
-         \includegraphics[width=120mm]{graph.jpg}
-     \caption{}
-\end{figure}
-
+\subsubsection{Supervisor}
+Os nodos são constitúidos por três entidades principais, sendo que o supervisor é responsável pela criação destas entidades.
+O supervisor, apesar de não participar no processamento dos dados, é responsável pela criação do nodo de processamento em si, bem como pela criação de dois processos que irão executar duas funções: 
+\begin{itemize}
+\item \texttt{manInput}:gestão do input recebido, fazendo a distinção entre dados e comandos, enviando o mesmo para o nodo ou para o outro filho
+\item \texttt{manOutput}:distribuição do output do nodo pelos nodos aos quais se encontra ligado bem como gestão dos file descriptors para os quais tem que enviar input
+\end{itemize}
+O output predefinido de um nodo é /dev/null, sendo que a partir do momento em que este(nodo) é ligado a outro o output é redireccionado para o named pipe que serve de input ao mesmo. A sintaxe usada na atribuição dos nomes dos \textit{pipes}é a seguinte "node<id>", sendo que id é o identificador do nodo, ou seja, o nodo 1 terá como input o \textit{named pipe} "node1"
 
 \subsubsection{Makefile}
 A makefile compila os ficheiros responsáveis pelas componentes (\texttt{const},  \texttt{filter}, \texttt{window}, \texttt{spawn}) e os ficheiros responsáveis pelo controlador (\texttt{controler}, \texttt{commands}, \texttt{supervisor}), utilizando as flags \texttt{g} e \texttt{Wall}. Também é responsável pela eliminação de todos os ficheiros objeto criados durante a compilação.
