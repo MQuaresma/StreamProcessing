@@ -172,7 +172,6 @@ void removeNode(char *args[], statusNodeP *status, pid_t *nodes, int *pipes, int
     strcat(pipeName,args[1]);
     remove(pipeName);
 
-    kill(SIGUSR1, nodes[nd]);
     nodes[nd]=0;
      
     free(argv);

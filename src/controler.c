@@ -43,32 +43,17 @@ int main(){
                     activeNodes--;
                     removeNode(argv, status, nodes, pipes, activeNodes, nNodes);
                 } 
-                else if(!strncmp(*argv, "quit", (len < 4 ? len : 4))) clean();
-            }    
+                else if(!strncmp(*argv, "quit", (len < 4 ? len : 4))){
+                    execlp("pkill","supervisor",NULL);
+                    exit(0);
+                }
+            }
             free(argv);
         }
     }
     free(status);
     free(nodes);
     return 0;
-}
-
-//kill all childs and clean files no longer needed
-void clean(){
-    
-    if(fork()==0){
-        execlp("pkill", "pkill", "supervisor", NULL);
-        perror("Cannot kill childs");
-        exit(0);
-    }
-    wait(NULL);
-    if(fork()==0){
-        execl("/bin/sh", "sh", "-c", "rm node* input", NULL);
-        perror("Cannot delete files");
-        exit(0);
-    }
-    wait(NULL);
-    exit(0);
 }
 
 /*

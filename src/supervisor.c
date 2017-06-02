@@ -4,10 +4,6 @@
 #include "iStormAPI.h"
 #define INITS 20
 
-void dummyAction(int sig){
-    if(sig != SIGUSR1) pause();
-};
-
 /*
  *
  */
@@ -17,7 +13,6 @@ int main(int argc, char *argv[]){
     int nPipeIN[2], nPipeOUT[2];
     char **args=NULL, *execN=NULL;
     pid_t proc=0, inC=0, outC=0;
-    signal(SIGUSR1,(void (*)(int))dummyAction);
 
     if(fd > 0){
         pipe(nPipeIN);
@@ -61,18 +56,13 @@ int main(int argc, char *argv[]){
                 close(nPipeOUT[1]);
                 close(nPipeOUT[0]);
                 close(fd);
-                manOutput();
+                manOutput(inC);
             }
             close(nPipeIN[0]);
             close(nPipeIN[1]);
             close(nPipeOUT[1]);
             close(nPipeOUT[0]);
             close(fd);
-            pause();
-            kill(SIGINT, inC);
-            kill(SIGINT, outC);
-            kill(SIGINT, proc);
-            remove(argv[1]);
         }
     }else perror("supervisor: ");
     return 0;    
@@ -88,17 +78,17 @@ void manInput(int cmdPipe){
         while(read(0,&c,1)>0){
             buf[i++]=c;
             if(c=='\n'){
-                buf[i]=0;
                 if(buf[0]==';') write(cmdPipe,buf,i);
                 else write(1,buf,i);
                 i=0;
+                kill(getpid(),SIGSTOP);
             }
         }   
     }    
 }
 
 
-void manOutput(void){
+void manOutput(pid_t manIn){
     int *pipes = (int*)calloc(INITS, sizeof(int)), i, nOut=0, defIn = open("log", O_WRONLY | O_APPEND,0777), idT, size=INITS;
     char buf[PIPE_BUF], pipeName[10];
 
@@ -132,7 +122,8 @@ void manOutput(void){
             else 
                 for(int j = 0; j < size; j ++)
                     if(pipes[j]) write(pipes[j], buf, i+1);
-        }  
+        }
+        kill(manIn,SIGCONT);
     }
 }
 

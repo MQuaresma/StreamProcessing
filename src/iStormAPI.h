@@ -17,5 +17,5 @@ void disconnect(char *[], int *, statusNodeP*);
 void removeNode(char *[],statusNodeP*, pid_t *, int *, int, int);
 
 void manInput(int);
-void manOutput(void);
+void manOutput(pid_t);
 void getPipeName(char *,char *);
