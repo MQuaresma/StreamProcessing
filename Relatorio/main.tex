@@ -90,24 +90,18 @@ Os comandos disponíveis são os seguintes:
     Função que realiza o comando \texttt{node <id> <cmd> <args...>}, definindo um nó de rede de processamento, com o indentificador  \texttt{id}, que executará o componente \texttt{cmd} com a lista de argumentos \texttt{[args]}. Para tal,começamos por criar um pipe com nome com o nome "nodeid", sendo que na posição do id estará o número do nodo, este pipe com nome como já indicado irá servir para o nodo receber input bem como comandos do controlador. De seguida tratamos de "criar" o nodo realmente ao criar um filho e colocar nele em execução o binario \texit{supervisor}. Por fim, abrimos o pipe com nome, guardando o \texit{file descriptor} do mesmo num array, sendo que guardamos também o \texit{process ID} necessário para posteriores ações sobre o supervisor.
 
 \item[connect] \hfill \\
-Função que realiza o comando \texttt{connect <id> <ids...>}, que permite definir ligações entre nós, ou seja, especifica que a saída do componente a correr no nó \texttt{id} deverá ser enviada para cada um dos nós da lista \texttt{[ids]}. 
-\\Esta função recebe como argumentos um \textit{array} com o \texttt{id} e os \texttt{[ids]} a conectar, um \textit{array} de inteiros com os pipes e a lista ligada com os estados dos nós.
-\\..... 
+    Função que realiza o comando \texttt{connect <id> <ids...>}, que permite definir ligações entre nós, ou seja, especifica que a saída do componente a correr no nó \texttt{id} deverá ser enviada para cada um dos nós da lista \texttt{[ids]}. Nesta função, atualizamos o status(array com tamanho igual ou maior ao número de nós em que em cada posição possui uma lista com a informação de que nodos recebe input) dos nodos que irão passar a receber o input do nodo presente como 1º argumento. Contudo para o nodo que envia input enviamos-lhe o comando ";cid" em que id é trocado pelo valor dos vários nodos que irão receber input, de modo a que saiba a quem enviar input.
 
 \item[inject] \hfill \\
-Função que realiza o comando \texttt{inject <id> <cmd> <args...>}, que permite injetar na entrada do nó \texttt{id} a saída produzida pelo comando cmd executado com a lista de argumentos \texttt{[args]}. 
-\\Esta função recebe como argumentos um \textit{array} de argumentos dada pelo \textit{stdin} e  um \textit{array} de inteiros com os pipes.
-\\.......
+    Função que realiza o comando \texttt{inject <id> <cmd> <args...>}, que permite injetar na entrada do nó \texttt{id} a saída produzida pelo comando cmd executado com a lista de argumentos \texttt{[args]}. Com a nossa implementação esta função é bastante simples bastando redirecionar o \texit{stdout} para o pipe com nome correspondente ao passado como argumento e após isso correr o comando. 
 
 \item[disconnect] \hfill \\
 Função que realiza o comando \texttt{disconnect <id1> <id2>}, que permite desfazer a ligação entre o nó \texttt{id1} e o nó \texttt{id2}. 
 \\Esta função recebe como argumentos um \textit{array} de argumentos dada pelo \textit{stdin}, um \textit{array} de inteiros com os pipes, e a lista ligada com os estados dos nós.
-\\......
 
 \item[removeNode] \hfill \\
 Função que realiza o comando \texttt{remove <id>}, que permite a remoção de um nó na rede. 
 \\Esta função recebe como argumento um \textit{array} de argumentos dada pelo \textit{stdin}, a lista ligada com os estados dos nós, um \textit{array} de inteiros com os pipes, um inteiro correspondente ao número de nós ativos, e um inteiro correspondente ao número de nós.
-\\...... 
 \end{description}
 
 Determinados comandos exigem ações por parte dos nodos e, por forma a que estes sejam diferentes dos dados enviados para os mesmos(nodos) é usado como prefixo o caracter ';' seguido de um caracter que identifique o comando a executar ('c' para \textit{connect} e 'd' para \textit{disconnect}).
@@ -139,9 +133,6 @@ O componente \textit{window} reproduz todas as linhas acrescentando-lhe uma nova
 
 \subsection{Funcionalidades básicas}
 \begin{description} 
-
-\item[Permanência de uma rede] \hfill \\
-Os nós de uma rede, depois de criados, continuam a existir até serem explicitamente removidos. Esta deve ficar recetiva a processar \textit{streams} de eventos que parem e recomecem mais tarde.
 
 \item[Concorrência nas escritas no mesmo nó] \hfill \\
 Ao especificar uma rede, vários nós podem ser ligados a um mesmo nó, ou várias instâncias do comando \texttt{inject}, com outras ainda a decorrer. Como tal, o sistema deve garantir que cada evento chega corretamente ao destino, não corrompido, havendo apenas intercalamento de eventos de diferentes origens.
