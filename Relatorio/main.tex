@@ -89,10 +89,10 @@ Os comandos disponíveis são os seguintes:
 Determinados comandos exigem ações por parte dos nodos e, por forma a que estes sejam diferentes dos dados enviados para os mesmos(nodos) é usado como prefixo o caracter ';' seguido de um caracter que identifique o comando a executar ('c' para \textit{connect} e 'd' para \textit{disconnect}).
 
 \begin{figure}[ht!]
- 83     \centering
- 84         \includegraphics[width=120mm]{graph.png}
- 85     \caption{}
- 86 \end{figure}
+     \centering
+         \includegraphics[width=120mm]{graph.jpg}
+     \caption{}
+\end{figure}
 
 
 \subsubsection{Makefile}
@@ -118,22 +118,16 @@ O componente \textit{window} reproduz todas as linhas acrescentando-lhe uma nova
 
 \end{description} 
 
-
 \subsection{Controlador}
 O controlador é a entidade responsável pela gestão da stream de dados e das operações realizadas
 O controlador é um programa que permite definir uma rede de processamento de \textit{streams}, com cada nó a executar um dos componentes de transformação previamente feitos, recebendo comandos, um por linha. 
-
-\subsubsection{controler}
-EXPLICAR VARIAVEIS CRIADAS AQUI...
 
 \subsubsection{commands}
 O ficheiro \texttt{commands.c} contém as funções necessárias para realizar os comandos que o controlador deve aceitar, sendo esses os seguintes:
 
 \begin{description} 
 \item[newNode] \hfill \\
-Função que realiza o comando \texttt{node <id> <cmd> <args...>}, que permite definir um nó de rede de processamento, com o indentificador  \texttt{id}, que irá executar o componente \texttt{cmd} com a lista de argumentos \texttt{[args]}. 
-\\Esta função recebe como argumentos um \textit{array} de argumentos dada pelo \textit{stdin} e o número total destes, um \textit{array} com o \texttt{ID} de todos os nós da rede, um \textit{array} de inteiros com os pipes, a lista ligada com os estados dos nós e um inteiro correspondente ao número de nós.
-\\......
+    Função que realiza o comando \texttt{node <id> <cmd> <args...>}, definindo um nó de rede de processamento, com o indentificador  \texttt{id}, que executará o componente \texttt{cmd} com a lista de argumentos \texttt{[args]}. Para tal,começamos por criar um pipe com nome com o nome "nodeid", sendo que na posição do id estará o número do nodo, este pipe com nome como já indicado irá servir para o nodo receber input bem como comandos do controlador. De seguida tratamos de "criar" o nodo realmente ao criar um filho e colocar nele em execução o binario \texit{supervisor}. Por fim, abrimos o pipe com nome, guardando o \texit{file descriptor} do mesmo num array, sendo que guardamos também o \texit{process ID} necessário para posteriores ações sobre o supervisor.
 
 \item[connect] \hfill \\
 Função que realiza o comando \texttt{connect <id> <ids...>}, que permite definir ligações entre nós, ou seja, especifica que a saída do componente a correr no nó \texttt{id} deverá ser enviada para cada um dos nós da lista \texttt{[ids]}. 
