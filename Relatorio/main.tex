@@ -96,12 +96,10 @@ Os comandos disponíveis são os seguintes:
     Função que realiza o comando \texttt{inject <id> <cmd> <args...>}, que permite injetar na entrada do nó \texttt{id} a saída produzida pelo comando cmd executado com a lista de argumentos \texttt{[args]}. Com a nossa implementação esta função é bastante simples bastando redirecionar o \texit{stdout} para o pipe com nome correspondente ao passado como argumento e após isso correr o comando. 
 
 \item[disconnect] \hfill \\
-Função que realiza o comando \texttt{disconnect <id1> <id2>}, que permite desfazer a ligação entre o nó \texttt{id1} e o nó \texttt{id2}. 
-\\Esta função recebe como argumentos um \textit{array} de argumentos dada pelo \textit{stdin}, um \textit{array} de inteiros com os pipes, e a lista ligada com os estados dos nós.
+    Função que realiza o comando \texttt{disconnect <id1> <id2>}, que permite desfazer a ligação entre o nó \texttt{id1} e o nó \texttt{id2}. Nesta função atualizamos o valor status do nodo id2 (de modo a saber que não recebe mais input do nodo id1) e, após isso mandamos o comando ";did2" ao nó id1 de maneira a saber que não deve mais enviar input ao nodo id2. 
 
 \item[removeNode] \hfill \\
-Função que realiza o comando \texttt{remove <id>}, que permite a remoção de um nó na rede. 
-\\Esta função recebe como argumento um \textit{array} de argumentos dada pelo \textit{stdin}, a lista ligada com os estados dos nós, um \textit{array} de inteiros com os pipes, um inteiro correspondente ao número de nós ativos, e um inteiro correspondente ao número de nós.
+    Função que realiza o comando \texttt{remove <id>}, que permite a remoção de um nó na rede. Em primeiro lugar, realizamos a desconexão entre os nodos que enviam input para o nodo a ser removido e, ao mesmo tempo conectamos esses nodos com os nodos que recebiam do nodo a ser removido. De seguida, desconectamos a ligação entre o nodo a ser removido e os nodos que recebiam input dele. Por fim, fecha-se o pipe com nome do nodo a ser removido, remove-se esse mesmo pipe, enviamos um sinal de interrupção ao supervisor e atualizamos o array dos \texit{process ID} colocando o valor a 0, de modo a garantir que não é enviado input.
 \end{description}
 
 Determinados comandos exigem ações por parte dos nodos e, por forma a que estes sejam diferentes dos dados enviados para os mesmos(nodos) é usado como prefixo o caracter ';' seguido de um caracter que identifique o comando a executar ('c' para \textit{connect} e 'd' para \textit{disconnect}).
