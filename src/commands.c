@@ -171,7 +171,7 @@ void removeNode(char *args[], statusNodeP *status, pid_t *nodes, int *pipes, int
     pipeName[4]=0;
     strcat(pipeName,args[1]);
     remove(pipeName);
-
+    kill(SIGINT, nodes[nd]);
     nodes[nd]=0;
      
     free(argv);

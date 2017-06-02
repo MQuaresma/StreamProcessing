@@ -133,10 +133,10 @@ O componente \textit{window} reproduz todas as linhas acrescentando-lhe uma nova
 \begin{description} 
 
 \item[Concorrência nas escritas no mesmo nó] \hfill \\
-Ao especificar uma rede, vários nós podem ser ligados a um mesmo nó, ou várias instâncias do comando \texttt{inject}, com outras ainda a decorrer. Como tal, o sistema deve garantir que cada evento chega corretamente ao destino, não corrompido, havendo apenas intercalamento de eventos de diferentes origens.
+    Visto tratar-se de um sistema que explora paralelismo e visto ser possível ter vários nodos a escrever para o mesmo ficheiro (ex: pipe de input de um nodo) é necessário garantir que cada evento chega ao destino corrompido. Para garanti que este requisito é cumprido as escritas para os pipes/ficheiros são feitas em bloco, neste caso, linha a linha, visto que o sistema se baseia todo em eventos, um por linha. Por outro lado, para garantir que os comandos e dados chegam na ordem que foram enviados recorremos a sinais, sendo exemplo disto o uso dos sinais \texttt{SIGSTOP} e \texttt{SIGCONT} para sincronizar a chegada de input ao manOutput no supervisor.
 
 \item[Nós sem saída definida] \hfill \\
-Os nós cuja saída não esteja ligada a nenhum outro devem ter a sua saída descartada.
+Os nós cuja saída não esteja ligada a nenhum outro devem ter a sua saída descartada, para isso esta é direccionada para /dev/null.
 
 \item[Especificação incremental na rede] \hfill \\
 O servidor vai recebenco comandos, devendo atuar perante cada um, atualizando a rede, independentemente de comandos futuros.
