@@ -75,24 +75,24 @@ A linguagem de programação C disponibiliza um conjunto de chamadas ao sistema 
 \subsection{Estrutura}
 
 \subsection{Controlador}
-
-\\Este programa começa por ler os eventos do \textit{stdin}, e após a passagem pela função \texttt{processCommand}, função que divide uma linha pelos parâmetro individuais consoante o \textit{token} ' ', executa o comando conforme o primeiro parâmetro recebido, ou seja, caso receba como primeiro parâmetro:
+O controlador é a entidade responsável por processar input e gerir a rede de processamento, nomeadamente através da criação/remoção de nodos e gestão das ligações entre os mesmos.
+A gestão dos nodos recorre a três arrays para manter informação relativa às ligações entre os nodos, ao pid(process id) dos mesmos e aos descriptores dos nnamed pipes que servem de input para os nodos.
+A leitura do input é feita linha a linha através de um named pipe com o nome \textit{input}, de seguida o input é classificado como instruções ou dados através da presença(ou ausência) do caracter ':'.
+Os comandos disponíveis são os seguintes:
+\begin{itemize}
+\item \texttt{node}: criação de um novo nodo, executado pela função \texttt{newNode}
+\item \texttt{connect}: ligação de nodos entre si, executado pela função \texttt{connect}
+\item \texttt{inject}: usado para providenciar input adicional aos nodos por meio da execução de um comando, executado pela função \texttt{inject}
+\item \texttt{disconnect}: usado para remover ligações entre nodos, executado pela função \texttt{disconnect}
+\item \texttt{remove}: remoção de um nodo, executado pela função \texttt{removeNode}
+\end{itemize}
+Determinados comandos exigem ações por parte dos nodos e, por forma a que estes sejam diferentes dos dados enviados para os mesmos(nodos) é usado como prefixo o caracter ';' seguido de um caracter que identifique o comando a executar ('c' para \textit{connect} e 'd' para \textit{disconnect}).
 
 \begin{figure}[ht!]
-    \centering
-        \includegraphics[width=120mm]{graph.png}
-    \caption{}
-\end{figure}
-
-\begin{itemize}
-\item \texttt{node}: o \texttt{controler} executa a função \texttt{newNode} responsável pela criação de um novo nó.
-\item \texttt{connect}: o \texttt{controler} executa a função \texttt{connect} responsável pela conexão entre nós
-\item \texttt{inject}: o \texttt{controler} executa a função \texttt{inject} que permite a injeção da entrada de um nó a saída produzida por um outro comando.
-\item \texttt{disconnect}: o \texttt{controler} executa a função \texttt{disconnect} que defaz a ligação entre dois nós.
-\item \texttt{remove}: o \texttt{controler} executa a função \texttt{remove} que remove um nó da rede.
-\end{itemize}
-
-
+ 83     \centering
+ 84         \includegraphics[width=120mm]{graph.png}
+ 85     \caption{}
+ 86 \end{figure}
 
 
 \subsubsection{Makefile}
