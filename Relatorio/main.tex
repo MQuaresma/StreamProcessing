@@ -59,6 +59,7 @@ Miguel Quaresma - a77049\\
 %----------------------------------------------------------------------------------------
 
 \section{Introdução}
+\paragraph{}
 \textit{Stream Processing} é uma arquitetura computacional que tem como intuito facilitar o uso de paralelismo no processamento de dados ao abstrair o utilizador da gestão dos recursos disponíveis (i.e: comunicação entre nodos, uso de recursos,etc). Os dados são recebidos sob a forma de streams e operações que são aplicadas a cada elemento da stream. 
 
 A linguagem de programação C disponibiliza um conjunto de chamadas ao sistema que permitem a exploração de paralelismo simples, sendo o intuito deste trabalho recorrer a estas mesmas chamadas para implementar um sistema similar ao referido.
@@ -87,19 +88,19 @@ Os comandos disponíveis são os seguintes:
 
 \begin{description} 
 \item[newNode] \hfill \\
-    Função que realiza o comando \texttt{node <id> <cmd> <args...>}, definindo um nó de rede de processamento, com o indentificador  \texttt{id}, que executará o componente \texttt{cmd} com a lista de argumentos \texttt{[args]}. Para tal,começamos por criar um pipe com nome com o nome "nodeid", sendo que na posição do id estará o número do nodo, este pipe com nome como já indicado irá servir para o nodo receber input bem como comandos do controlador. De seguida tratamos de "criar" o nodo realmente ao criar um filho e colocar nele em execução o binario \texit{supervisor}. Por fim, abrimos o pipe com nome, guardando o \texit{file descriptor} do mesmo num array, sendo que guardamos também o \texit{process ID} necessário para posteriores ações sobre o supervisor.
+   Função que realiza o comando \texttt{node <id> <cmd> <args...>}, definindo um nó de rede de processamento, com o indentificador  \texttt{id}, que executará o componente \texttt{cmd} com a lista de argumentos \texttt{[args]}. Para tal,começamos por criar um pipe com nome com o nome "nodeid", sendo que na posição do id estará o número do nodo, este pipe com nome como já indicado irá servir para o nodo receber input bem como comandos do controlador. De seguida tratamos de "criar" o nodo realmente ao criar um filho e colocar nele em execução o binario \textit{supervisor}. Por fim, abrimos o pipe com nome, guardando o \textit{file descriptor} do mesmo num array, sendo que guardamos também o \textit{process ID} necessário para posteriores ações sobre o supervisor.
 
 \item[connect] \hfill \\
     Função que realiza o comando \texttt{connect <id> <ids...>}, que permite definir ligações entre nós, ou seja, especifica que a saída do componente a correr no nó \texttt{id} deverá ser enviada para cada um dos nós da lista \texttt{[ids]}. Nesta função, atualizamos o status(array com tamanho igual ou maior ao número de nós em que em cada posição possui uma lista com a informação de que nodos recebe input) dos nodos que irão passar a receber o input do nodo presente como 1º argumento. Contudo para o nodo que envia input enviamos-lhe o comando ";cid" em que id é trocado pelo valor dos vários nodos que irão receber input, de modo a que saiba a quem enviar input.
 
 \item[inject] \hfill \\
-    Função que realiza o comando \texttt{inject <id> <cmd> <args...>}, que permite injetar na entrada do nó \texttt{id} a saída produzida pelo comando cmd executado com a lista de argumentos \texttt{[args]}. Com a nossa implementação esta função é bastante simples bastando redirecionar o \texit{stdout} para o pipe com nome correspondente ao passado como argumento e após isso correr o comando. 
+    Função que realiza o comando \texttt{inject <id> <cmd> <args...>}, que permite injetar na entrada do nó \texttt{id} a saída produzida pelo comando cmd executado com a lista de argumentos \texttt{[args]}. Com a nossa implementação esta função é bastante simples bastando redirecionar o \textit{stdout} para o pipe com nome correspondente ao passado como argumento e após isso correr o comando. 
 
 \item[disconnect] \hfill \\
-    Função que realiza o comando \texttt{disconnect <id1> <id2>}, que permite desfazer a ligação entre o nó \texttt{id1} e o nó \texttt{id2}. Nesta função atualizamos o valor status do nodo id2 (de modo a saber que não recebe mais input do nodo id1) e, após isso mandamos o comando ";did2" ao nó id1 de maneira a saber que não deve mais enviar input ao nodo id2. 
+    Função que realiza o comando \texttt{disconnect <id1> <id2>}, que permite desfazer a ligação entre o nó \texttt{id1} e o nó \texttt{id2}. Nesta função atualizamos o valor status do nodo id2 (de modo a saber que não recebe mais input do nodo id1) e, após isso mandamos o comando '';did2'' ao nó id1 de maneira a saber que não deve mais enviar input ao nodo id2. 
 
 \item[removeNode] \hfill \\
-    Função que realiza o comando \texttt{remove <id>}, que permite a remoção de um nó na rede. Em primeiro lugar, realizamos a desconexão entre os nodos que enviam input para o nodo a ser removido e, ao mesmo tempo conectamos esses nodos com os nodos que recebiam do nodo a ser removido. De seguida, desconectamos a ligação entre o nodo a ser removido e os nodos que recebiam input dele. Por fim, fecha-se o pipe com nome do nodo a ser removido, remove-se esse mesmo pipe, enviamos um sinal de interrupção ao supervisor e atualizamos o array dos \texit{process ID} colocando o valor a 0, de modo a garantir que não é enviado input.
+    Função que realiza o comando \texttt{remove <id>}, que permite a remoção de um nó na rede. Em primeiro lugar, realizamos a desconexão entre os nodos que enviam input para o nodo a ser removido e, ao mesmo tempo conectamos esses nodos com os nodos que recebiam do nodo a ser removido. De seguida, desconectamos a ligação entre o nodo a ser removido e os nodos que recebiam input dele. Por fim, fecha-se o pipe com nome do nodo a ser removido, remove-se esse mesmo pipe, enviamos um sinal de interrupção ao supervisor e atualizamos o array dos \textit{process ID} colocando o valor a 0, de modo a garantir que não é enviado input.
 \end{description}
 
 Determinados comandos exigem ações por parte dos nodos e, por forma a que estes sejam diferentes dos dados enviados para os mesmos(nodos) é usado como prefixo o caracter ';' seguido de um caracter que identifique o comando a executar ('c' para \textit{connect} e 'd' para \textit{disconnect}).
@@ -113,6 +114,7 @@ O supervisor, apesar de não participar no processamento dos dados, é responsá
 \end{itemize}
 O output predefinido de um nodo é /dev/null, sendo que a partir do momento em que este(nodo) é ligado a outro o output é redireccionado para o named pipe que serve de input ao mesmo. A sintaxe usada na atribuição dos nomes dos \textit{pipes}é a seguinte "node<id>", sendo que id é o identificador do nodo, ou seja, o nodo 1 terá como input o \textit{named pipe} "node1"
 
+\newpage
 \subsection{Componentes} 
 \begin{description} 
 \item[Const] \hfill \\
@@ -129,6 +131,7 @@ O componente \textit{window} reproduz todas as linhas acrescentando-lhe uma nova
 
 \end{description} 
 
+\newpage
 \subsection{Funcionalidades básicas}
 \begin{description} 
 
@@ -139,21 +142,44 @@ O componente \textit{window} reproduz todas as linhas acrescentando-lhe uma nova
 Os nós cuja saída não esteja ligada a nenhum outro devem ter a sua saída descartada, para isso esta é direccionada para /dev/null.
 
 \item[Especificação incremental na rede] \hfill \\
-O servidor vai recebenco comandos, devendo atuar perante cada um, atualizando a rede, independentemente de comandos futuros.
+O servidor vai recebenco comandos, devendo atuar perante cada um, atualizando a rede, independentemente de comandos futuros. O nosso programa está preparado para receber continuamente comandos, e atualizar constantemente a rede de nós.
 
 \end{description}
 
+\newpage
 \subsection{Funcionalidades adicionais}
 
 \begin{description} 
 \item[Casos de teste] \hfill \\
-rrrrr
+Para testar o nosso programa realizámos um caso de teste. Para isso criámos um ficheiro \texttt{.txt} com o seguinte exemplo:
+\begin{verbatim}
+    node 1 grep -w int filter.c
+    node 2 grep -w int const.c
+    node 3 grep -w int spawn.c
+    node 4 grep -w int window.c
+    node 5 grep -w int commands.c
+    node 6 tee result.txt
+    connect 1 6
+    connect 2 6
+    connect 3 6
+    connect 4 6
+    connect 5 6
+\end{verbatim}
+O objetivo deste caso é a criação de 6 nós, cada um com um comando diferente, e os nós 1 a 5 estão conectados ao nó com o 6. 
+Após correr o programa, podemos ver como resultado o seguinte: 
+%PRINT
+%\begin{figure}[ht!]
+%\centering
+%\includegraphics[width=120mm]{.jpg}
+%\caption{}
+%\end{figure}
+Como podemos verificar o resultado do teste é o esperado.
 
-\item[Alteração de componentes] \hfill \\
-aaaa
+
+%\item[Alteração de componentes] \hfill \\
 
 \item[Remoção de nós] \hfill \\
-ggg
+Para remoção de um nó específico criámos o comando \texttt{remove <id>}, à qual recebe o id do nó a remover, e posteriormente o controlador faz a remoção do id contido no comando, como explicado anteriormente, na subsecção \textbf{Controlador}.
 
 
 \end{description}
@@ -164,8 +190,14 @@ ggg
 %----------------------------------------------------------------------------------------
 
 \section{Conclusão} 
+\paragraph{}
+Neste trabalho, o principal objetivo era a utilização da linguagem de programação C, para a construção de um sistema de \textit{stream processing}, pretendendo a implementação de um conjunto de componentes que realizam tarefas elementares, e a implementação de um sistema que compõe e controla a rede de processamento.
 
-ESCREVER CONCLUSAO! 
+De uma maneira geral conseguimos implementar todas as funcionalidades pedidas no enunciado, exceptuando a 'Alteração de Componentes', que permite a alteração do componente a correr num nó. 
+
+A nossa maior dificuldade, na implementação do projeto foi o controlo de concorrência de escritas no mesmo nó, mas após a realização de alguns testes conseguimos resolver esse problema.
+
+Durante o processo de codificação, pretendeu-se como objetivo criar um programa que realizasse todas as funcionalidades pedidas, e pensámos que ao criar o programa \texttt{controller} e \texttt{supervisor} seria uma maneira simples e nítida de solucionar o problema em questão.
 
 
 %----------------------------------------------------------------------------------------
