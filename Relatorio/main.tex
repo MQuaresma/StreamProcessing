@@ -84,53 +84,6 @@ O controlador é a entidade responsável por processar input e gerir a rede de p
 A gestão dos nodos recorre a três arrays para manter informação relativa às ligações entre os nodos, ao pid(process id) dos mesmos e aos descriptores dos nnamed pipes que servem de input para os nodos.
 A leitura do input é feita linha a linha através de um named pipe com o nome \textit{input}, de seguida o input é classificado como instruções ou dados através da presença(ou ausência) do caracter ':'.
 Os comandos disponíveis são os seguintes:
-\begin{itemize}
-\item \texttt{node}: criação de um novo nodo, executado pela função \texttt{newNode}
-\item \texttt{connect}: ligação de nodos entre si, executado pela função \texttt{connect}
-\item \texttt{inject}: usado para providenciar input adicional aos nodos por meio da execução de um comando, executado pela função \texttt{inject}
-\item \texttt{disconnect}: usado para remover ligações entre nodos, executado pela função \texttt{disconnect}
-\item \texttt{remove}: remoção de um nodo, executado pela função \texttt{removeNode}
-\end{itemize}
-Determinados comandos exigem ações por parte dos nodos e, por forma a que estes sejam diferentes dos dados enviados para os mesmos(nodos) é usado como prefixo o caracter ';' seguido de um caracter que identifique o comando a executar ('c' para \textit{connect} e 'd' para \textit{disconnect}).
-
-\subsubsection{Supervisor}
-Os nodos são constitúidos por três entidades principais, sendo que o supervisor é responsável pela criação destas entidades.
-O supervisor, apesar de não participar no processamento dos dados, é responsável pela criação do nodo de processamento em si, bem como pela criação de dois processos que irão executar duas funções: 
-\begin{itemize}
-\item \texttt{manInput}:gestão do input recebido, fazendo a distinção entre dados e comandos, enviando o mesmo para o nodo ou para o outro filho
-\item \texttt{manOutput}:distribuição do output do nodo pelos nodos aos quais se encontra ligado bem como gestão dos file descriptors para os quais tem que enviar input
-\end{itemize}
-O output predefinido de um nodo é /dev/null, sendo que a partir do momento em que este(nodo) é ligado a outro o output é redireccionado para o named pipe que serve de input ao mesmo. A sintaxe usada na atribuição dos nomes dos \textit{pipes}é a seguinte "node<id>", sendo que id é o identificador do nodo, ou seja, o nodo 1 terá como input o \textit{named pipe} "node1"
-
-\subsubsection{Makefile}
-A makefile compila os ficheiros responsáveis pelas componentes (\texttt{const},  \texttt{filter}, \texttt{window}, \texttt{spawn}) e os ficheiros responsáveis pelo controlador (\texttt{controler}, \texttt{commands}, \texttt{supervisor}), utilizando as flags \texttt{g} e \texttt{Wall}. Também é responsável pela eliminação de todos os ficheiros objeto criados durante a compilação.
-
-\subsubsection{iStormAPI.h}
-O ficheiro iStormAPI.
-
-
-\subsection{Componentes} 
-\begin{description} 
-\item[Const] \hfill \\
-O componente \textit{const} reproduz as linhas recebidas acrescentando uma nova coluna sempre com o mesmo valor. Para isso, lemos caractér a caractér recebido pelo \textit{stdin} e após verificar que estamos no término de uma linha ('\textbackslash n'), adicionamos uma nova coluna com o valor dado como argumento. Posteriormente, concluímos a linha com '\textbackslash n', e reproduzimo-la no \textit{stdout}, realizando esta operação para todas as linhas recebidas. 
-
-\item[Filter] \hfill \\
-O componente \textit{filter} reproduz as linhas que satisfazem uma condição passada como argumento. Esta condição é composta por um operador de comparação e dois valores que correspondem a colunas das linhas a ser processadas. Inicialmente começamos por dividir a linha recebida pelo \textit{stdin} consoante o \textit{token} ':',caso estejamos numa linha presente na condição guardamos o valor numa variavel local, para posteriormente verificarmos a condição recebida, caso verdadeira a linha será reproduzida no \textit{stdout}, caso falso será desprezada.
-
-\item[Window] \hfill \\
-O componente \textit{window} reproduz todas as linhas acrescentando-lhe uma nova coluna com o resultado de uma operação calculada sobre valores da coluna indicada nas linhas anteriores. Inicialmente começamos por verificar os argumentos recebidos, guardando a coluna, a operação e quais as linhas anteriores a serem calculadas. De seguida, começámos a leitura das linhas recebidas pelo \textit{stdin} e à medida que uma linha termina é reproduzido no \textit{stdout} a linha com a coluna que representa o cálculo da operação, previamente calculada consoante o tipo de operação, ou seja, inicialmente, como não há linhas anteriores a nova coluna será zero, mas consoante o avanço das linhas será recalculado o valor da nova coluna e guardado numa variável que será posteriormente utilizada para criar a nova coluna. Consoante o tipo de operação enviada como argumento, criámos diferentes funções.
-
-\item[Spawn] \hfill \\
-    O componente \textit{spawn} reproduz todas as linhas, executando o comando indicado uma vez para cada uma delas, e acrescentando uma nova coluna com o respectivo \textit{exit status}. É permitido o uso de \textit{'\$n'} no qual é indicado o número de uma coluna das linhas, de modo a que ao executar o comando, nos seus argumentos na posição do \textit{'\$n'} esteja o conteúdo presente na coluna n de cada linha. Para tal, vamos lendo a linha, caracter a caracter, e quando encontramos a/s coluna/s especificada/s guardamos o conteudo numa variavel local. Quando chegamos ao '\textbackslash n' executamos o argumento num filho, porém tendo o cuidado de substituir as partes com '\$n' pelo correto conteúdo.  
-
-\end{description} 
-
-\subsection{Controlador}
-O controlador é a entidade responsável pela gestão da stream de dados e das operações realizadas
-O controlador é um programa que permite definir uma rede de processamento de \textit{streams}, com cada nó a executar um dos componentes de transformação previamente feitos, recebendo comandos, um por linha. 
-
-\subsubsection{commands}
-O ficheiro \texttt{commands.c} contém as funções necessárias para realizar os comandos que o controlador deve aceitar, sendo esses os seguintes:
 
 \begin{description} 
 \item[newNode] \hfill \\
@@ -157,8 +110,32 @@ Função que realiza o comando \texttt{remove <id>}, que permite a remoção de 
 \\...... 
 \end{description}
 
-\subsubsection{supervisor}
+Determinados comandos exigem ações por parte dos nodos e, por forma a que estes sejam diferentes dos dados enviados para os mesmos(nodos) é usado como prefixo o caracter ';' seguido de um caracter que identifique o comando a executar ('c' para \textit{connect} e 'd' para \textit{disconnect}).
 
+\subsubsection{Supervisor}
+Os nodos são constitúidos por três entidades principais, sendo que o supervisor é responsável pela criação destas entidades.
+O supervisor, apesar de não participar no processamento dos dados, é responsável pela criação do nodo de processamento em si, bem como pela criação de dois processos que irão executar duas funções: 
+\begin{itemize}
+\item \texttt{manInput}:gestão do input recebido, fazendo a distinção entre dados e comandos, enviando o mesmo para o nodo ou para o outro filho
+\item \texttt{manOutput}:distribuição do output do nodo pelos nodos aos quais se encontra ligado bem como gestão dos file descriptors para os quais tem que enviar input
+\end{itemize}
+O output predefinido de um nodo é /dev/null, sendo que a partir do momento em que este(nodo) é ligado a outro o output é redireccionado para o named pipe que serve de input ao mesmo. A sintaxe usada na atribuição dos nomes dos \textit{pipes}é a seguinte "node<id>", sendo que id é o identificador do nodo, ou seja, o nodo 1 terá como input o \textit{named pipe} "node1"
+
+\subsection{Componentes} 
+\begin{description} 
+\item[Const] \hfill \\
+O componente \textit{const} reproduz as linhas recebidas acrescentando uma nova coluna sempre com o mesmo valor. Para isso, lemos caractér a caractér recebido pelo \textit{stdin} e após verificar que estamos no término de uma linha ('\textbackslash n'), adicionamos uma nova coluna com o valor dado como argumento. Posteriormente, concluímos a linha com '\textbackslash n', e reproduzimo-la no \textit{stdout}, realizando esta operação para todas as linhas recebidas. 
+
+\item[Filter] \hfill \\
+O componente \textit{filter} reproduz as linhas que satisfazem uma condição passada como argumento. Esta condição é composta por um operador de comparação e dois valores que correspondem a colunas das linhas a ser processadas. Inicialmente começamos por dividir a linha recebida pelo \textit{stdin} consoante o \textit{token} ':',caso estejamos numa linha presente na condição guardamos o valor numa variavel local, para posteriormente verificarmos a condição recebida, caso verdadeira a linha será reproduzida no \textit{stdout}, caso falso será desprezada.
+
+\item[Window] \hfill \\
+O componente \textit{window} reproduz todas as linhas acrescentando-lhe uma nova coluna com o resultado de uma operação calculada sobre valores da coluna indicada nas linhas anteriores. Inicialmente começamos por verificar os argumentos recebidos, guardando a coluna, a operação e quais as linhas anteriores a serem calculadas. De seguida, começámos a leitura das linhas recebidas pelo \textit{stdin} e à medida que uma linha termina é reproduzido no \textit{stdout} a linha com a coluna que representa o cálculo da operação, previamente calculada consoante o tipo de operação, ou seja, inicialmente, como não há linhas anteriores a nova coluna será zero, mas consoante o avanço das linhas será recalculado o valor da nova coluna e guardado numa variável que será posteriormente utilizada para criar a nova coluna. Consoante o tipo de operação enviada como argumento, criámos diferentes funções.
+
+\item[Spawn] \hfill \\
+    O componente \textit{spawn} reproduz todas as linhas, executando o comando indicado uma vez para cada uma delas, e acrescentando uma nova coluna com o respectivo \textit{exit status}. É permitido o uso de \textit{'\$n'} no qual é indicado o número de uma coluna das linhas, de modo a que ao executar o comando, nos seus argumentos na posição do \textit{'\$n'} esteja o conteúdo presente na coluna n de cada linha. Para tal, vamos lendo a linha, caracter a caracter, e quando encontramos a/s coluna/s especificada/s guardamos o conteudo numa variavel local. Quando chegamos ao '\textbackslash n' executamos o argumento num filho, porém tendo o cuidado de substituir as partes com '\$n' pelo correto conteúdo.  
+
+\end{description} 
 
 \subsection{Funcionalidades básicas}
 \begin{description} 
