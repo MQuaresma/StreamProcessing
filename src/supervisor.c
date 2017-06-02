@@ -89,7 +89,7 @@ void manInput(int cmdPipe){
 
 
 void manOutput(pid_t manIn){
-    int *pipes = (int*)calloc(INITS, sizeof(int)), i, nOut=0, defIn = open("log", O_WRONLY | O_APPEND,0777), idT, size=INITS;
+    int *pipes = (int*)calloc(INITS, sizeof(int)), i, nOut=0, defIn = open("/dev/null", O_WRONLY | O_APPEND,0777), idT, size=INITS;
     char buf[PIPE_BUF], pipeName[10];
 
     while(1){

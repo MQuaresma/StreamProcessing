@@ -18,7 +18,7 @@ int main(){
     pid_t *nodes = (pid_t*)calloc(INITS, sizeof(pid_t));
 	statusNodeP *status = (statusNodeP*)calloc(INITS, sizeof(statusNodeP));
     int *pipes = (int*)calloc(INITS, sizeof(int)), len=0, input=0;;
-    int argc, nNodes=INITS, i, activeNodes=0, fd=open("log", O_CREAT, 0777), inPipe;
+    int argc, nNodes=INITS, i, activeNodes=0, inPipe;
 	char cmd[PIPE_BUF], **argv;
 
     if(!mkfifo("input", 0666) && (inPipe=open("input", O_RDONLY)) > 0) dup2(inPipe, 0);
@@ -44,7 +44,6 @@ int main(){
                     removeNode(argv, status, nodes, pipes, activeNodes, nNodes);
                 } 
                 else if(!strncmp(*argv, "quit", (len < 4 ? len : 4))){
-                    close(fd);
                     execlp("pkill","pkill", "supervisor",NULL);
                     exit(0);
                 }
