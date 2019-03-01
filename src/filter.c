@@ -13,7 +13,7 @@ int main(int argc, char* argv[]) {
 			line[a]='\n';
 			a++;
 			char * aux = (char*)malloc(sizeof(char)*a);
-			strcpy(aux,line);
+			strlcpy(aux,line, sizeof(char)*a);
 			int i = 0;
 			const char s[2]= ":";
 			char * token;
